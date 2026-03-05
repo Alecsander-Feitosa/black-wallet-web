@@ -152,4 +152,6 @@ if __name__ == '__main__':
             db.session.add_all([t1, t2, t3, t4])
             db.session.commit()
             
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
