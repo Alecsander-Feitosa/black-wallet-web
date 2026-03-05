@@ -17,8 +17,8 @@ login_manager.login_view = 'login'
 
 # --- CONFIGURAÇÃO WEB3 ---
 # Em vez de http://127.0.0.1:8545
-provider_url = os.getenv('WEB3_PROVIDER_URL', 'http://127.0.0.1:8545')
-w3 = Web3(Web3.HTTPProvider(provider_url))
+RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/SOABSuqx6KFbHWG7LMaib"
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
 USDT_ADDR = w3.to_checksum_address('0xdAC17F958D2ee523a2206206994597C13D831ec7')
 abi = json.loads('[{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"}]')
 usdt_contract = w3.eth.contract(address=USDT_ADDR, abi=abi)
