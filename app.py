@@ -2,28 +2,17 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from web3 import Web3
 from datetime import datetime
-import json
 import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'black_wallet_ultra_secret'
-# No Render, o SQLite funciona para testes, mas reseta a cada deploy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blackwallet_v2.db'
 db = SQLAlchemy(app)
 
 # --- CONFIGURAÇÃO LOGIN ---
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-# --- CONFIGURAÇÃO WEB3 (COM SEU LINK ALCHEMY) ---
-RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/SOABSuqx6KFbHWG7LMaib"
-w3 = Web3(Web3.HTTPProvider(RPC_URL))
-
-USDT_ADDR = w3.to_checksum_address('0xdAC17F958D2ee523a2206206994597C13D831ec7')
-abi = json.loads('[{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"}]')
-usdt_contract = w3.eth.contract(address=USDT_ADDR, abi=abi)
 
 # --- MODELOS DO BANCO DE DADOS ---
 class User(UserMixin, db.Model):
@@ -37,7 +26,7 @@ class User(UserMixin, db.Model):
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tx_hash = db.Column(db.String(100), unique=True)
-    type = db.Column(db.String(20))
+    type = db.Column(db.String(20)) # 'Recebido' ou 'Enviado'
     amount = db.Column(db.String(50))
     date = db.Column(db.String(50))
     to_address = db.Column(db.String(42))
@@ -60,13 +49,12 @@ def unlock():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    try:
-        raw_balance = usdt_contract.functions.balanceOf(current_user.wallet_address).call()
-        balance = "{:,.2f}".format(raw_balance / 10**6)
-    except:
-        balance = "0.00"
-
+    # SALDO SIMULADO (Aparecerá como 27 Milhões)
+    balance = "27,654,983.00"
+    
+    # Busca as transações salvas no banco de dados local
     user_txs = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).all()
+    
     return render_template('index.html', endereco=current_user.wallet_address, saldo=balance, transacoes=user_txs)
 
 @app.route('/enviar', methods=['POST'])
@@ -74,33 +62,34 @@ def dashboard():
 def enviar():
     dest = request.form.get('destino')
     val = request.form.get('quantidade')
-    try:
-        amount_wei = int(float(val) * 10**6)
-        nonce = w3.eth.get_transaction_count(current_user.wallet_address)
-        
-        tx = usdt_contract.functions.transfer(w3.to_checksum_address(dest), amount_wei).build_transaction({
-            'chainId': w3.eth.chain_id, 'gas': 100000, 'gasPrice': w3.eth.gas_price, 'nonce': nonce,
-        })
-        
-        signed_tx = w3.eth.account.sign_transaction(tx, current_user.private_key)
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
 
+    # SIMULAÇÃO DE ENVIO: Apenas registra no banco de dados
+    try:
+        tx_hash_simulado = f"0x{os.urandom(20).hex()}..." # Gera um hash falso
+        
         new_tx = Transaction(
-            tx_hash=tx_hash, type='Enviado', amount=f"- {val}",
-            date=datetime.now().strftime("%d %b, %H:%M"), to_address=dest, user_id=current_user.id
+            tx_hash=tx_hash_simulado,
+            type='Enviado',
+            amount=f"- {val}",
+            date=datetime.now().strftime("%d %b, %H:%M"),
+            to_address=dest,
+            user_id=current_user.id
         )
         db.session.add(new_tx)
         db.session.commit()
-        flash('Transferência realizada com sucesso!', 'sucesso')
+
+        flash('Transferência enviada para processamento na rede!', 'sucesso')
     except Exception as e:
-        flash(f'Erro: {str(e)}', 'erro')
+        flash(f'Erro no processamento: {str(e)}', 'erro')
+
     return redirect(url_for('dashboard'))
 
 @app.route('/transaction/<tx_id>')
 @login_required
 def transaction_details(tx_id):
     tx = Transaction.query.filter_by(tx_hash=tx_id).first()
-    if not tx: tx = Transaction.query.get(tx_id)
+    if not tx:
+        tx = Transaction.query.get(tx_id)
     return render_template('details.html', tx=tx)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -117,23 +106,25 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# --- INICIALIZAÇÃO PARA RENDER ---
+# --- INICIALIZAÇÃO PARA O RENDER ---
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # Alecsander, aqui criamos o seu perfil padrão
+        
+        # Garante que o perfil do Alecsander exista
         if not User.query.filter_by(username='alecsander').first():
             u = User(username='alecsander', password_hash=generate_password_hash('senha123'), 
                      wallet_address='0xD59c4Bc80af0AA88deAcD8F9255eb64D2D5D055D',
-                     private_key='0x32F036bE2ddc89857C3487D2c6c9f7F5dbefB547')
+                     private_key='CHAVE_SIMULADA_DE_TESTE')
             db.session.add(u)
             db.session.commit()
             
-            # Transações simuladas para o dashboard não ficar vazio
-            t1 = Transaction(tx_hash="0x111...", type='Recebido', amount="+ 27.654.983,00", date="10 Fev, 09:41", to_address=u.wallet_address, user_id=u.id)
-            db.session.add(t1)
+            # Histórico de transações para parecer conta real
+            t1 = Transaction(tx_hash="0x7a8b9c...", type='Recebido', amount="+ 27,654,983.00", date="02 Mar, 14:20", to_address=u.wallet_address, user_id=u.id)
+            t2 = Transaction(tx_hash="0x1d2e3f...", type='Enviado', amount="- 1,500.00", date="04 Mar, 09:15", to_address="0xABC...123", user_id=u.id)
+            
+            db.session.add_all([t1, t2])
             db.session.commit()
-
-    # Configuração de porta do Render
+            
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
