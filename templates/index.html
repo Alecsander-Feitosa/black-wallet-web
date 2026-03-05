@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Black Wallet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0a0a0c; 
+            color: white;
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 40px 20px;
+        }
+
+        .wallet-app { 
+            background: #121318; 
+            width: 100%;
+            max-width: 450px; 
+            border-radius: 28px; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.7); 
+            border: 1px solid #2a2d3a; 
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        /* Topo da Carteira */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+        .logo span { color: #50AF95; }
+        .logout { 
+            color: #8FA3B0; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 500; 
+            opacity: 0.7; 
+            transition: 0.3s;
+        }
+        .logout:hover { opacity: 1; color: #ff4c4c; }
+
+        /* Cartão de Saldo Principal */
+        .balance-card { 
+            background: linear-gradient(135deg, #1b1e28 0%, #0a0a0c 100%);
+            border: 1px solid #2a2d3a; 
+            border-radius: 24px; 
+            padding: 35px 20px; 
+            margin-bottom: 35px; 
+            text-align: center;
+        }
+        .balance-label { 
+            font-size: 11px; 
+            color: #8FA3B0; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 15px; 
+            display: block; 
+        }
+        .balance-amount { 
+            font-size: 34px; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px; 
+            margin: 0; 
+        }
+        .usdt-logo { width: 36px; height: 36px; }
+        
+        .address-pill { 
+            background: #121318; 
+            border: 1px solid #2a2d3a; 
+            padding: 10px 18px; 
+            border-radius: 30px; 
+            font-size: 11px; 
+            color: #8FA3B0; 
+            margin-top: 25px;
+            display: inline-flex; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .address-pill:hover { border-color: #50AF95; color: #fff; }
+        .address-pill span { color: #50AF95; margin-left: 8px; font-weight: bold; }
+
+        /* Seção de Transferência */
+        .section-title { 
+            font-size: 13px; 
+            font-weight: 600; 
+            margin-bottom: 18px; 
+            color: #8FA3B0; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+        }
+        .input-group { 
+            background: #0a0a0c; 
+            border: 1px solid #2a2d3a; 
+            border-radius: 16px; 
+            padding: 4px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            align-items: center; 
+        }
+        .input-group input { 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            padding: 16px; 
+            width: 100%; 
+            font-size: 14px; 
+            outline: none; 
+            font-family: 'Inter', sans-serif;
+        }
+        .usdt-tag { color: #50AF95; font-weight: 700; font-size: 13px; padding-right: 20px; }
+        
+        .btn-send { 
+            background-color: #50AF95; 
+            color: #fff; 
+            border: none; 
+            padding: 18px; 
+            border-radius: 16px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 16px; 
+            font-weight: 600; 
+            transition: 0.3s;
+            margin-bottom: 40px;
+        }
+        .btn-send:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(80, 175, 149, 0.2); 
+            background-color: #42947e;
+        }
+
+        /* Lista de Histórico */
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item-link { text-decoration: none; color: inherit; display: block; }
+        .history-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 20px 0; 
+            border-bottom: 1px solid #1e2029;
+            transition: 0.2s;
+        }
+        .history-item:hover { transform: translateX(5px); }
+        .history-item:last-child { border-bottom: none; }
+        
+        .hist-info { display: flex; flex-direction: column; }
+        .hist-type { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .hist-date { font-size: 11px; color: #555; }
+        
+        .hist-value { text-align: right; }
+        .val-amount { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .val-status { 
+            font-size: 10px; 
+            color: #50AF95; 
+            background: rgba(80, 175, 149, 0.1); 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-weight: 600;
+        }
+        
+        .positive { color: #28a745; }
+        .negative { color: #ff4c4c; }
+
+        /* Mensagens de Alerta */
+        .flash-msg { 
+            margin-top: 20px; 
+            font-size: 13px; 
+            text-align: center; 
+            border-radius: 12px; 
+            padding: 14px; 
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2a2d3a; 
+        }
+        .flash-sucesso { color: #28a745; border-color: rgba(40, 167, 69, 0.3); }
+        .flash-erro { color: #ff4c4c; border-color: rgba(255, 76, 76, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="wallet-app">
+        <div class="header">
+            <div class="logo">BLACK<span>WALLET</span></div>
+            <a href="/logout" class="logout">Desconectar</a>
+        </div>
+        
+        <div class="balance-card">
+            <span class="balance-label">Patrimônio em USDT</span>
+            <div class="balance-amount">
+                <img src="{{ url_for('static', filename='tether-usdt-logo.svg') }}" alt="USDT" class="usdt-logo">
+                {{ saldo }}
+            </div>
+            <div class="address-pill" onclick="copiarEndereco()">
+                {{ endereco[:10] }}...{{ endereco[-8:] }} <span>COPIAR</span>
+            </div>
+        </div>
+        
+        <div class="section-title">Enviar Fundos</div>
+        <form action="/enviar" method="POST">
+            <div class="input-group">
+                <input type="text" name="destino" placeholder="Endereço de Destino (0x...)" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="number" step="0.000001" name="quantidade" placeholder="0.00" required>
+                <div class="usdt-tag">USDT</div>
+            </div>
+            <button type="submit" class="btn-send">Confirmar Transferência</button>
+        </form>
+
+        <div class="section-title">Atividades Recentes</div>
+        <div class="history-list">
+            {% for tx in transacoes %}
+            <a href="{{ url_for('transaction_details', tx_id=tx.tx_hash) }}" class="history-item-link">
+                <div class="history-item">
+                    <div class="hist-info">
+                        <span class="hist-type">{{ tx.type }}</span>
+                        <span class="hist-date">{{ tx.date }}</span>
+                    </div>
+                    <div class="hist-value">
+                        <div class="val-amount {% if 'Recebido' in tx.type %}positive{% else %}negative{% endif %}">
+                            {{ tx.amount }}
+                        </div>
+                        <span class="val-status">Confirmado</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+    function copiarEndereco() {
+        const enderecoCompleto = "{{ endereco }}";
+        navigator.clipboard.writeText(enderecoCompleto).then(() => {
+            const btnSpan = document.querySelector('.address-pill span');
+            const originalText = btnSpan.innerText;
+            btnSpan.innerText = "COPIADO!";
+            btnSpan.style.color = "#28a745";
+            
+            setTimeout(() => { 
+                btnSpan.innerText = originalText; 
+                btnSpan.style.color = "#50AF95";
+            }, 2000);
+        }).catch(err => {
+            alert('Erro ao copiar endereço.');
+        });
+    }
+    </script>
+</body>
+</html>

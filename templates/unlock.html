@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sincronizando - BLACK WALLET</title>
+    <script>
+        setTimeout(function() { window.location.href = "{{ url_for('dashboard') }}"; }, 5000);
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { 
+            font-family: 'JetBrains Mono', monospace; 
+            background-color: #0a0a0c; color: #50AF95; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; text-align: center;
+        }
+        .unlock-container { width: 300px; }
+        .matrix-text { font-size: 12px; margin-bottom: 15px; color: #8FA3B0; text-transform: uppercase; letter-spacing: 1px; }
+        .qr-placeholder { 
+            width: 160px; height: 160px; margin: 0 auto 30px auto; 
+            background: url('https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=SecureBootProcessBlackWallet&bgcolor=0a0a0c&color=50AF95') no-repeat center;
+            border: 1px solid #2a2d3a; padding: 10px; border-radius: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        .loading-bar { width: 100%; height: 4px; background: #2a2d3a; border-radius: 2px; overflow: hidden; margin-top: 20px; }
+        .progress { height: 100%; background: #50AF95; width: 0%; animation: load 4.8s linear forwards; }
+        
+        @keyframes load { to { width: 100%; } }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; box-shadow: 0 0 15px rgba(80, 175, 149, 0.4); } 100% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+    <div class="unlock-container">
+        <div class="qr-placeholder"></div>
+        <div class="matrix-text" id="status-text">Lendo Chaves Privadas...</div>
+        <div class="loading-bar"><div class="progress"></div></div>
+    </div>
+    <script>
+        const texts = ["Lendo Chaves Privadas...", "Descriptografando...", "Conectando ao Nó Web3...", "Acesso Liberado."];
+        let i = 0;
+        setInterval(() => { if(i < texts.length - 1) { document.getElementById("status-text").innerText = texts[++i]; } }, 1200);
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Acesso Seguro - Black Wallet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0a0a0c; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; color: #fff;
+        }
+        .login-card { 
+            background: linear-gradient(145deg, #16181f, #101216); 
+            padding: 40px; border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
+            text-align: center; width: 320px; border: 1px solid #2a2d3a;
+        }
+        .logo-text { font-size: 24px; font-weight: 800; letter-spacing: 2px; margin-bottom: 30px; color: #fff; }
+        .logo-text span { color: #50AF95; /* Verde Tether */ }
+        input {
+            width: 100%; padding: 14px; margin: 10px 0; box-sizing: border-box;
+            border-radius: 10px; border: 1px solid #2a2d3a;
+            background: #0a0a0c; color: white; font-size: 14px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: #50AF95; box-shadow: 0 0 10px rgba(80, 175, 149, 0.2); }
+        .btn { 
+            background-color: #50AF95; color: #fff; border: none; 
+            padding: 14px; border-radius: 10px; cursor: pointer; 
+            width: 100%; font-size: 16px; font-weight: 600; margin-top: 20px; transition: 0.3s;
+        }
+        .btn:hover { background-color: #3e8c75; transform: translateY(-2px); }
+        .flash-msg { color: #ff4c4c; font-size: 13px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo-text">BLACK<span>WALLET</span></div>
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash-msg">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="text" name="username" placeholder="Usuário ID" required autocomplete="off">
+            <input type="password" name="password" placeholder="Senha de Desbloqueio" required>
+            <button type="submit" class="btn">Conectar Dispositivo</button>
+        </form>
+    </div>
+</body>
+</html>
