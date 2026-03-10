@@ -173,23 +173,31 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    # O host '0.0.0.0' é obrigatório para o deploy funcionar
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    # 1. PRIMEIRO: Preparamos a base de dados e os dados iniciais
     with app.app_context():
         db.create_all() 
+        
+        # Usuário Principal
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='0xD59c4Bc80af0AA88deAcD8F9255eb64D2D5D055D', private_key='0x32F036bE2ddc89857C3487D2c6c9f7F5dbefB547')
+            u = User(username='66281966', 
+                     password_hash=generate_password_hash('senha123'), 
+                     wallet_address='0xD59c4Bc80af0AA88deAcD8F9255eb64D2D5D055D', 
+                     private_key='0x32F036bE2ddc89857C3487D2c6c9f7F5dbefB547')
             db.session.add(u)
             db.session.commit()
             
-        # Criando a segunda carteira para testes
+        # Segunda carteira (Bonelaria)
         u2 = User.query.filter_by(username='bonelaria').first()
         if not u2:
-            u2 = User(username='bonelaria', password_hash=generate_password_hash('senha123'), wallet_address='0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', private_key='0x1111111111111111111111111111111111111111111111111111111111111111')
+            u2 = User(username='bonelaria', 
+                      password_hash=generate_password_hash('senha123'), 
+                      wallet_address='0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', 
+                      private_key='0x1111111111111111111111111111111111111111111111111111111111111111')
             db.session.add(u2)
             db.session.commit()
             
+        # Injeção de Histórico Realista (se estiver vazio)
         if Transaction.query.filter_by(user_id=u.id).count() < 4:
             Transaction.query.filter_by(user_id=u.id).delete()
             db.session.commit()
@@ -202,6 +210,12 @@ if __name__ == '__main__':
             ]
             for t in txs:
                 db.session.add(t)
+            db.session.commit()
+
+    # 2. ÚLTIMO PASSO: Ligar o servidor (Apenas UMA vez)
+    # No Render, ele precisa do host 0.0.0.0 e da porta dinâmica
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
             db.session.commit()
 
     app.run(debug=True)
