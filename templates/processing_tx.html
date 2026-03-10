@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>AUTHORIZING... - BLACK WALLET</title>
+    <script>
+        // Redireciona após exatamente 5.5 segundos
+        setTimeout(function() { window.location.href = "{{ url_for('dashboard') }}"; }, 5500);
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body { 
+            background-color: #000; color: #50AF95; 
+            font-family: 'JetBrains Mono', monospace; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+
+        .auth-container { width: 350px; text-align: left; }
+
+        /* Ícone de Escudo Criptográfico */
+        .shield-icon {
+            width: 60px; height: 60px; border: 2px solid #50AF95;
+            margin: 0 auto 40px auto; position: relative;
+            animation: pulse 1.5s infinite;
+        }
+        .shield-icon::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 30px; height: 2px; background: #50AF95;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(80, 175, 149, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(80, 175, 149, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(80, 175, 149, 0); }
+        }
+
+        .terminal-text { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; line-height: 2; }
+        
+        .step { opacity: 0; animation: fadeIn 0.4s forwards; }
+        .step.ok { color: #fff; }
+        .step.loading { color: #8FA3B0; }
+
+        /* Delay das mensagens para preencher os 5.5 segundos */
+        .s1 { animation-delay: 0.8s; }
+        .s2 { animation-delay: 1.8s; }
+        .s3 { animation-delay: 3.0s; }
+        .s4 { animation-delay: 4.2s; }
+        .s5 { animation-delay: 5.0s; color: #fff; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Scanner Line */
+        .scanner {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(80, 175, 149, 0.5);
+            box-shadow: 0 0 15px #50AF95;
+            animation: scan 2.5s linear infinite;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100vh; } }
+    </style>
+</head>
+<body>
+    <div class="scanner"></div>
+    
+    <div class="auth-container">
+        <div class="shield-icon"></div>
+        
+        <div class="terminal-text">
+            <div class="step s1 ok">> INITIALIZING COLD_PROTOCOL_v4... [DONE]</div>
+            <div class="step s2 ok">> FETCHING PRIVATE_KEY_STORAGE... [SECURE]</div>
+            <div class="step s3 loading">> SIGNING TRANSACTION HASH... [COMPUTING]</div>
+            <div class="step s4 ok">> BROADCASTING TO ETH_MAINNET... [SUCCESS]</div>
+            <div class="step s5">> TX_ID: {{ tx_hash[:16] }}...COMPLETE</div>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 9px; color: #222;">
+            HARDWARE_TOKEN_VERIFIED: 0x9928-AX-00
+        </div>
+    </div>
+</body>
+</html>

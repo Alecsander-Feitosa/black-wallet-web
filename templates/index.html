@@ -19,6 +19,15 @@
             padding: 40px 20px;
         }
 
+        .chart-container {
+            background: #1b1e28;
+            border: 1px solid #2a2d3a;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 30px;
+            height: 180px;
+            position: relative;
+        }
         .wallet-app { 
             background: #121318; 
             width: 100%;
@@ -30,7 +39,6 @@
             box-sizing: border-box;
         }
 
-        /* Topo da Carteira */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -49,7 +57,6 @@
         }
         .logout:hover { opacity: 1; color: #ff4c4c; }
 
-        /* Cartão de Saldo Principal */
         .balance-card { 
             background: linear-gradient(135deg, #1b1e28 0%, #0a0a0c 100%);
             border: 1px solid #2a2d3a; 
@@ -75,7 +82,15 @@
             gap: 12px; 
             margin: 0; 
         }
-        .usdt-logo { width: 36px; height: 36px; }
+        .usdt-logo { 
+            width: 36px; 
+            height: 36px; 
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .usdt-logo:hover {
+            transform: scale(1.15);
+        }
         
         .address-pill { 
             background: #121318; 
@@ -93,7 +108,23 @@
         .address-pill:hover { border-color: #50AF95; color: #fff; }
         .address-pill span { color: #50AF95; margin-left: 8px; font-weight: bold; }
 
-        /* Seção de Transferência */
+        .market-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 30px; 
+        }
+        .market-item { 
+            background: #1b1e28; 
+            padding: 15px; 
+            border-radius: 16px; 
+            border: 1px solid #2a2d3a; 
+            text-align: left;
+        }
+        .market-label { font-size: 10px; color: #8FA3B0; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .market-value { font-size: 14px; font-weight: 600; color: #fff; }
+        .brl-highlight { color: #28a745; }
+
         .section-title { 
             font-size: 13px; 
             font-weight: 600; 
@@ -142,7 +173,6 @@
             background-color: #42947e;
         }
 
-        /* Lista de Histórico */
         .history-list { list-style: none; padding: 0; margin: 0; }
         .history-item-link { text-decoration: none; color: inherit; display: block; }
         .history-item { 
@@ -174,7 +204,6 @@
         .positive { color: #28a745; }
         .negative { color: #ff4c4c; }
 
-        /* Mensagens de Alerta */
         .flash-msg { 
             margin-top: 20px; 
             font-size: 13px; 
@@ -198,7 +227,9 @@
         <div class="balance-card">
             <span class="balance-label">Patrimônio em USDT</span>
             <div class="balance-amount">
-                <img src="{{ url_for('static', filename='tether-usdt-logo.svg') }}" alt="USDT" class="usdt-logo">
+                <a href="https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7" target="_blank" title="Ver Contrato Oficial do USDT no Etherscan" style="display: flex; align-items: center;">
+                    <img src="{{ url_for('static', filename='tether-usdt-logo.svg') }}" alt="USDT" class="usdt-logo">
+                </a>
                 {{ saldo }}
             </div>
             <div class="address-pill" onclick="copiarEndereco()">
@@ -206,17 +237,29 @@
             </div>
         </div>
         
-        <div class="section-title">Enviar Fundos</div>
-        <form action="/enviar" method="POST">
-            <div class="input-group">
-                <input type="text" name="destino" placeholder="Endereço de Destino (0x...)" required autocomplete="off">
+        <div class="market-grid">
+            <div class="market-item" style="grid-column: span 2;">
+                <span class="market-label">Valor Estimado em Real (BRL)</span>
+                <span class="market-value brl-highlight">{{ precos.brl }}</span>
             </div>
-            <div class="input-group">
-                <input type="number" step="0.000001" name="quantidade" placeholder="0.00" required>
-                <div class="usdt-tag">USDT</div>
+            <div class="market-item">
+                <span class="market-label">Equivalente em BTC</span>
+                <span class="market-value">{{ precos.btc }}</span>
             </div>
-            <button type="submit" class="btn-send">Confirmar Transferência</button>
-        </form>
+            <div class="market-item">
+                <span class="market-label">Equivalente em ETH</span>
+                <span class="market-value">{{ precos.eth }}</span>
+            </div>
+        </div>
+
+        <div class="section-title">Evolução do Património</div>
+        <div class="chart-container">
+            <canvas id="evolutionChart"></canvas>
+        </div>
+
+        <a href="/transferir" class="btn-send" style="display: block; text-align: center; text-decoration: none; margin-bottom: 40px; box-sizing: border-box; background-color: #50AF95; color: white;">
+            Fazer Nova Transferência
+        </a>
 
         <div class="section-title">Atividades Recentes</div>
         <div class="history-list">
@@ -247,6 +290,8 @@
         {% endwith %}
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
     function copiarEndereco() {
         const enderecoCompleto = "{{ endereco }}";
@@ -264,6 +309,68 @@
             alert('Erro ao copiar endereço.');
         });
     }
+
+    // CÓDIGO DO GRÁFICO DE EVOLUÇÃO
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvasElement = document.getElementById('evolutionChart');
+        
+        if (canvasElement) {
+            const ctx = canvasElement.getContext('2d');
+            
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(80, 175, 149, 0.4)'); 
+            gradient.addColorStop(1, 'rgba(80, 175, 149, 0.0)');
+
+            const evolutionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels | tojson }},
+                    datasets: [{
+                        label: 'Saldo em USDT',
+                        data: {{ chart_data | tojson }},
+                        borderColor: '#50AF95',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0a0a0c',
+                        pointBorderColor: '#50AF95',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#121318',
+                            titleColor: '#8FA3B0',
+                            bodyColor: '#fff',
+                            borderColor: '#2a2d3a',
+                            borderWidth: 1,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    return value + ' USDT';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { display: false }, 
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: '#8FA3B0', font: { family: 'Inter', size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
     </script>
 </body>
 </html>
