@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from web3 import Web3
+cached_prices = None
+last_update = 0
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'
@@ -65,11 +67,12 @@ def unlock():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    total_usdt = 28569766.81
-    endereco_visivel = current_user.wallet_address # Agora mostra o endereço do usuário logado
-
+    global cached_prices, last_update
+    
+    saldo_base = 5000000.00 
     transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).all()
     
+    total_usdt = saldo_base
     chart_labels = ['Hoje']
     chart_data = [total_usdt]
     temp_balance = total_usdt
@@ -77,38 +80,44 @@ def dashboard():
     for tx in transacoes:
         valor_str = tx.amount.replace('+', '').replace('-', '').replace('.', '').replace(',', '.')
         try:
-            valor_float = float(valor_str.strip())
+            valor_f = float(valor_str.strip())
             if 'Recebido' in tx.type:
-                temp_balance -= valor_float
+                total_usdt += valor_f
+                temp_balance -= valor_f
             else:
-                temp_balance += valor_float
-            
-            dia_mes = tx.date.split(',')[0] if ',' in tx.date else tx.date
-            chart_labels.insert(0, dia_mes)
+                total_usdt -= valor_f
+                temp_balance += valor_f
+            chart_labels.insert(0, tx.date.split(',')[0])
             chart_data.insert(0, temp_balance)
-        except:
-            continue
+        except: continue
 
-    precos = {}
-    try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum&vs_currencies=brl"
-        response = requests.get(url, timeout=5)
-        data = response.json()
-        precos = {
-            'brl': f"R$ {total_usdt * data['tether']['brl']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
-            'btc': f"{(total_usdt * data['tether']['brl']) / data['bitcoin']['brl']:.6f} BTC",
-            'eth': f"{(total_usdt * data['tether']['brl']) / data['ethereum']['brl']:.6f} ETH"
-        }
-    except Exception as e:
-        precos = {'brl': 'Indisponível', 'btc': '--', 'eth': '--'}
+    # --- LÓGICA DE CACHE PARA AS COTAÇÕES ---
+    current_time = time.time()
+    # Só consulta a API se não houver cache ou se a última atualização foi há mais de 300 segundos (5 min)
+    if cached_prices is None or (current_time - last_update) > 300:
+        try:
+            url = "https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum&vs_currencies=brl"
+            res = requests.get(url, timeout=5).json()
+            
+            cached_prices = {
+                'brl': f"R$ {total_usdt * res['tether']['brl']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
+                'btc': f"{(total_usdt * res['tether']['brl']) / res['bitcoin']['brl']:.6f} BTC",
+                'eth': f"{(total_usdt * res['tether']['brl']) / res['ethereum']['brl']:.6f} ETH"
+            }
+            last_update = current_time
+        except Exception as e:
+            print(f"Erro na API: {e}")
+            # Se a API falhar mas tivermos cache antigo, usamos o antigo. Se não, mostramos erro.
+            if cached_prices is None:
+                cached_prices = {'brl': 'Indisponível', 'btc': '--', 'eth': '--'}
 
-    saldo_formatado = f"{total_usdt:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-
+    saldo_f = f"{total_usdt:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    
     return render_template('index.html', 
-                           saldo=saldo_formatado, 
-                           endereco=endereco_visivel,
-                           transacoes=transacoes,
-                           precos=precos,
+                           saldo=saldo_f, 
+                           endereco=current_user.wallet_address, 
+                           transacoes=transacoes, 
+                           precos=cached_prices, # Usamos o valor em cache
                            chart_labels=chart_labels, 
                            chart_data=chart_data)
 
