@@ -7,9 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from web3 import Web3
-import time
-cached_prices = None
-last_update = 0
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'
@@ -29,7 +26,7 @@ login_manager.login_view = 'login'
 provider_url = os.getenv('WEB3_PROVIDER_URL', 'https://cloudflare-eth.com')
 w3 = Web3(Web3.HTTPProvider(provider_url))
 
-USDT_ADDR = w3.to_checksum_address('0xdAC17F958D2ee523a2206206994597C13D831ec7')
+USDT_ADDR = w3.to_checksum_address('0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76')
 abi = json.loads('[{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"}]')
 usdt_contract = w3.eth.contract(address=USDT_ADDR, abi=abi)
 
@@ -68,12 +65,11 @@ def unlock():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    global cached_prices, last_update
-    
-    saldo_base = 5000000.00 
+    total_usdt = 94149343.656019
+    endereco_visivel = current_user.wallet_address # Agora mostra o endereço do usuário logado
+
     transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).all()
     
-    total_usdt = saldo_base
     chart_labels = ['Hoje']
     chart_data = [total_usdt]
     temp_balance = total_usdt
@@ -81,44 +77,38 @@ def dashboard():
     for tx in transacoes:
         valor_str = tx.amount.replace('+', '').replace('-', '').replace('.', '').replace(',', '.')
         try:
-            valor_f = float(valor_str.strip())
+            valor_float = float(valor_str.strip())
             if 'Recebido' in tx.type:
-                total_usdt += valor_f
-                temp_balance -= valor_f
+                temp_balance -= valor_float
             else:
-                total_usdt -= valor_f
-                temp_balance += valor_f
-            chart_labels.insert(0, tx.date.split(',')[0])
-            chart_data.insert(0, temp_balance)
-        except: continue
-
-    # --- LÓGICA DE CACHE PARA AS COTAÇÕES ---
-    current_time = time.time()
-    # Só consulta a API se não houver cache ou se a última atualização foi há mais de 300 segundos (5 min)
-    if cached_prices is None or (current_time - last_update) > 300:
-        try:
-            url = "https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum&vs_currencies=brl"
-            res = requests.get(url, timeout=5).json()
+                temp_balance += valor_float
             
-            cached_prices = {
-                'brl': f"R$ {total_usdt * res['tether']['brl']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
-                'btc': f"{(total_usdt * res['tether']['brl']) / res['bitcoin']['brl']:.6f} BTC",
-                'eth': f"{(total_usdt * res['tether']['brl']) / res['ethereum']['brl']:.6f} ETH"
-            }
-            last_update = current_time
-        except Exception as e:
-            print(f"Erro na API: {e}")
-            # Se a API falhar mas tivermos cache antigo, usamos o antigo. Se não, mostramos erro.
-            if cached_prices is None:
-                cached_prices = {'brl': 'Indisponível', 'btc': '--', 'eth': '--'}
+            dia_mes = tx.date.split(',')[0] if ',' in tx.date else tx.date
+            chart_labels.insert(0, dia_mes)
+            chart_data.insert(0, temp_balance)
+        except:
+            continue
 
-    saldo_f = f"{total_usdt:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-    
+    precos = {}
+    try:
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum&vs_currencies=brl"
+        response = requests.get(url, timeout=5)
+        data = response.json()
+        precos = {
+            'brl': f"R$ {total_usdt * data['tether']['brl']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
+            'btc': f"{(total_usdt * data['tether']['brl']) / data['bitcoin']['brl']:.6f} BTC",
+            'eth': f"{(total_usdt * data['tether']['brl']) / data['ethereum']['brl']:.6f} ETH"
+        }
+    except Exception as e:
+        precos = {'brl': 'Indisponível', 'btc': '--', 'eth': '--'}
+
+    saldo_formatado = f"{total_usdt:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+
     return render_template('index.html', 
-                           saldo=saldo_f, 
-                           endereco=current_user.wallet_address, 
-                           transacoes=transacoes, 
-                           precos=cached_prices, # Usamos o valor em cache
+                           saldo=saldo_formatado, 
+                           endereco=endereco_visivel,
+                           transacoes=transacoes,
+                           precos=precos,
                            chart_labels=chart_labels, 
                            chart_data=chart_data)
 
@@ -183,30 +173,23 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
+    # O host '0.0.0.0' é obrigatório para o deploy funcionar
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
     with app.app_context():
         db.create_all() 
-        
-        # Verifica ou cria o usuário principal
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', 
-                     password_hash=generate_password_hash('senha123'), 
-                     wallet_address='0xD59c4Bc80af0AA88deAcD8F9255eb64D2D5D055D', 
-                     private_key='0x32F036bE2ddc89857C3487D2c6c9f7F5dbefB547')
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76', private_key='0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76')
             db.session.add(u)
             db.session.commit()
             
-        # Verifica ou cria a carteira Bonelaria
+        # Criando a segunda carteira para testes
         u2 = User.query.filter_by(username='bonelaria').first()
         if not u2:
-            u2 = User(username='bonelaria', 
-                      password_hash=generate_password_hash('senha123'), 
-                      wallet_address='0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', 
-                      private_key='0x1111111111111111111111111111111111111111111111111111111111111111')
+            u2 = User(username='bonelaria', password_hash=generate_password_hash('senha123'), wallet_address='0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', private_key='0x1111111111111111111111111111111111111111111111111111111111111111')
             db.session.add(u2)
             db.session.commit()
             
-        # Injeção de Histórico (apenas se houver menos de 4 transações)
         if Transaction.query.filter_by(user_id=u.id).count() < 4:
             Transaction.query.filter_by(user_id=u.id).delete()
             db.session.commit()
@@ -221,6 +204,4 @@ if __name__ == '__main__':
                 db.session.add(t)
             db.session.commit()
 
-    # Configuração de porta para o Render
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
