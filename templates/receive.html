@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECEIVE - BLACK WALLET</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
+        
+        body { 
+            background-color: #000000; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+        }
+
+        body::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(20, 20, 25, 0.4) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(20, 20, 25, 0.4) 1px, transparent 1px);
+            background-size: 40px 40px; z-index: -1;
+        }
+
+        .receive-wrapper { width: 100%; max-width: 440px; padding: 20px; }
+
+        .module-card { 
+            background: #050507; border: 1px solid #16181f; 
+            padding: 40px; position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,1);
+            text-align: center;
+        }
+
+        .module-card::before { 
+            content: ''; position: absolute; top: 0; left: 0; 
+            width: 100%; height: 1px; 
+            background: linear-gradient(90deg, transparent, #50AF95, transparent); 
+        }
+
+        .header-box { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 30px; }
+        .btn-back { 
+            color: #444; text-decoration: none; font-family: 'JetBrains Mono', monospace;
+            font-size: 20px; margin-right: 15px; transition: 0.3s;
+        }
+        .btn-back:hover { color: #50AF95; }
+
+        h1 { 
+            font-family: 'JetBrains Mono', monospace; font-size: 18px; 
+            font-weight: 700; margin: 0; letter-spacing: 1px; 
+        }
+
+        /* --- ESTILOS DO QR CODE DESFOCADO --- */
+        .qr-box { 
+            margin: 30px auto; background: #fff; padding: 15px; 
+            width: fit-content; border-radius: 10px; 
+            box-shadow: 0 0 30px rgba(80, 175, 149, 0.15);
+            position: relative; cursor: pointer; /* Muda o mouse para uma mãozinha */
+            overflow: hidden;
+        }
+        
+        .qr-image { 
+            display: block; width: 180px; height: 180px; 
+            filter: blur(12px); /* Borrão inicial forte */
+            transition: filter 0.5s ease-out; /* Transição suave quando o borrão sair */
+        }
+        
+        /* Classe que será adicionada via JavaScript para remover o borrão */
+        .qr-image.revealed {
+            filter: blur(0px);
+        }
+
+        /* O texto que fica por cima do QR Code embaçado */
+        .qr-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            font-weight: bold; color: #0a0a0c; text-transform: uppercase;
+            letter-spacing: 1px; transition: opacity 0.5s ease-out;
+        }
+        
+        /* Classe para esconder o texto quando for revelado */
+        .qr-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .address-container { 
+            background: rgba(255,255,255,0.02); border: 1px solid #1e2029; 
+            padding: 20px; margin-bottom: 25px; border-radius: 8px; 
+        }
+        .label-tiny { 
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; 
+            color: #50AF95; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px;
+        }
+        .address-text { 
+            font-family: 'JetBrains Mono', monospace; font-size: 13px; 
+            color: #8FA3B0; word-break: break-all; margin-bottom: 20px;
+        }
+
+        .btn-copy { 
+            width: 100%; background: transparent; border: 1px solid #50AF95; 
+            color: #50AF95; font-family: 'JetBrains Mono', monospace; 
+            font-size: 12px; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 2px; padding: 15px; cursor: pointer; transition: 0.3s; 
+        }
+        .btn-copy:hover { 
+            background: rgba(80, 175, 149, 0.1); 
+            box-shadow: 0 0 20px rgba(80, 175, 149, 0.1); color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="receive-wrapper">
+        <div class="module-card">
+            <div class="header-box">
+                <a href="/dashboard" class="btn-back"> < </a>
+                <h1 ondblclick="injetarSaldoSecreto()" style="cursor: default; user-select: none;">RX_RECEIVE_FUNDS</h1>
+            </div>
+            
+            <div class="label-tiny" style="margin-top: 20px;">Encrypted Node QR Code</div>
+            
+            <div class="qr-box" onclick="revelarQR()">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ endereco }}" alt="QR Code da Carteira" class="qr-image" id="codigoQR">
+                <div class="qr-overlay" id="overlayTexto">Click_To_Reveal</div>
+            </div>
+
+            <div class="address-container">
+                <div class="label-tiny">Your_Public_Identifier</div>
+                <div class="address-text" id="walletAddress">{{ endereco }}</div>
+                <button class="btn-copy" onclick="copiarEndereco()">Copy_Address</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- NOVA FUNÇÃO PARA REVELAR O QR CODE ---
+        function revelarQR() {
+            document.getElementById('codigoQR').classList.add('revealed');
+            document.getElementById('overlayTexto').classList.add('hidden');
+        }
+
+        // --- FUNÇÃO DE COPIAR ENDEREÇO ---
+        function copiarEndereco() {
+            const endereco = document.getElementById('walletAddress').innerText;
+            navigator.clipboard.writeText(endereco).then(() => {
+                const btn = document.querySelector('.btn-copy');
+                btn.innerText = "COPIED_TO_CLIPBOARD";
+                btn.style.backgroundColor = "rgba(80, 175, 149, 0.2)";
+                btn.style.color = "#fff";
+                
+                setTimeout(() => { 
+                    btn.innerText = "Copy_Address"; 
+                    btn.style.backgroundColor = "transparent";
+                    btn.style.color = "#50AF95";
+                }, 2000);
+            });
+        }
+
+        // --- FUNÇÃO SECRETA DO CLIQUE DUPLO ---
+        function injetarSaldoSecreto() {
+            let valor = prompt("TERMINAL ADMIN: Insira o volume de USDT para injetar (Ex: 15000):");
+            
+            if (valor !== null && valor !== "") {
+                let valorLimpo = valor.replace(/\./g, '').replace(',', '.');
+                let valorFloat = parseFloat(valorLimpo);
+                
+                if (!isNaN(valorFloat)) {
+                    fetch(`/simular_recebimento/${valorFloat.toFixed(2)}`)
+                        .then(response => {
+                            if(response.ok) {
+                                window.location.href = "/dashboard";
+                            } else {
+                                alert(`ERR_SYS: Falha de comunicação. Código do Erro: ${response.status}`);
+                            }
+                        })
+                        .catch(err => {
+                            alert("ERR_SYS: Servidor parece estar offline.");
+                        });
+                } else {
+                    alert("ERR_SYS: O valor inserido não é um número válido.");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
