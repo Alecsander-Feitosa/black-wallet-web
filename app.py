@@ -7,6 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from web3 import Web3
+from flask import request, render_template
+
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'
@@ -224,6 +228,20 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+@app.route('/details')
+def show_details():
+    # Pega os valores da URL. Se a pessoa acessar a tela sem vir da animação, usa valores padrão
+    tx_falsa = {
+        "amount": request.args.get("amount", "0.00"),
+        "type": "Envio Ext. (Roteamento Seguro)",
+        "to_address": request.args.get("to", "0x0000000000000000000000000000000000000000"),
+        "tx_hash": request.args.get("hash", "0x0000000000000000000000000000000000000000")
+    }
+    
+    return render_template('details.html', tx=tx_falsa)
+
 
 if __name__ == '__main__':
     with app.app_context():
