@@ -215,6 +215,73 @@
         }
         .flash-sucesso { color: #28a745; border-color: rgba(40, 167, 69, 0.3); }
         .flash-erro { color: #ff4c4c; border-color: rgba(255, 76, 76, 0.3); }
+
+
+        /* Oculta a notificação inicialmente fora da tela */
+    #secure-toast {
+        position: fixed;
+        top: 30px;
+        right: -400px; /* Fora da tela */
+        width: 320px;
+        background: #050507;
+        border: 1px solid #50AF95;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(80, 175, 149, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        z-index: 9999;
+        font-family: 'JetBrains Mono', monospace;
+        transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Classe que faz a notificação deslizar para dentro */
+    #secure-toast.show {
+        right: 30px;
+    }
+
+    .toast-header {
+        color: #ff4c4c; /* Vermelho para chamar atenção */
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #16181f;
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .toast-body {
+        font-size: 10px;
+        color: #8FA3B0;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .toast-body span.highlight {
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .toast-progress-bg {
+        width: 100%;
+        height: 3px;
+        background: #16181f;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    /* Animação de 5 segundos cravados */
+    .toast-progress-bar {
+        height: 100%;
+        width: 100%;
+        background: #50AF95;
+        transform-origin: left;
+    }
+
+    @keyframes shrinkBar {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
     </style>
 </head>
 <body>
@@ -295,9 +362,12 @@
         {% endwith %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+    // ==========================================
+    // 1. CÓDIGO DO GRÁFICO E COPIAR ENDEREÇO
+    // ==========================================
     function copiarEndereco() {
         const enderecoCompleto = "{{ endereco }}";
         navigator.clipboard.writeText(enderecoCompleto).then(() => {
@@ -310,72 +380,194 @@
                 btnSpan.innerText = originalText; 
                 btnSpan.style.color = "#50AF95";
             }, 2000);
-        }).catch(err => {
-            alert('Erro ao copiar endereço.');
-        });
+        }).catch(err => alert('Erro ao copiar endereço.'));
     }
 
-    // CÓDIGO DO GRÁFICO DE EVOLUÇÃO
     document.addEventListener("DOMContentLoaded", function() {
         const canvasElement = document.getElementById('evolutionChart');
-        
         if (canvasElement) {
             const ctx = canvasElement.getContext('2d');
-            
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, 'rgba(80, 175, 149, 0.4)'); 
             gradient.addColorStop(1, 'rgba(80, 175, 149, 0.0)');
 
-            const evolutionChart = new Chart(ctx, {
+            new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: {{ chart_labels | tojson }},
                     datasets: [{
-                        label: 'Saldo em USDT',
-                        data: {{ chart_data | tojson }},
-                        borderColor: '#50AF95',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        pointBackgroundColor: '#0a0a0c',
-                        pointBorderColor: '#50AF95',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true,
-                        tension: 0.4 
+                        label: 'Saldo em USDT', data: {{ chart_data | tojson }},
+                        borderColor: '#50AF95', backgroundColor: gradient,
+                        borderWidth: 2, pointBackgroundColor: '#0a0a0c',
+                        pointBorderColor: '#50AF95', fill: true, tension: 0.4 
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#121318',
-                            titleColor: '#8FA3B0',
-                            bodyColor: '#fff',
-                            borderColor: '#2a2d3a',
-                            borderWidth: 1,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    let value = context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-                                    return value + ' USDT';
-                                }
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: { display: false }, 
-                        x: {
-                            grid: { display: false, drawBorder: false },
-                            ticks: { color: '#8FA3B0', font: { family: 'Inter', size: 10 } }
-                        }
+                        x: { grid: { display: false }, ticks: { color: '#8FA3B0' } }
                     }
                 }
             });
         }
     });
+
+    // ==========================================
+    // 2. SISTEMA DE PERSISTÊNCIA VISUAL (A MÁGICA)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function() {
+        // Carrega o saldo modificado, se existir
+        let saldoPersistido = localStorage.getItem('blackwallet_saldo_fake');
+        if (saldoPersistido) {
+            atualizarVisorSaldo(saldoPersistido);
+        }
+
+        // Carrega as transações falsas no histórico
+        let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
+        const historyList = document.querySelector('.history-list');
+        if (historyList && historicoPersistido.length > 0) {
+            // Inverte para colocar as mais recentes no topo
+            historicoPersistido.reverse().forEach(txHTML => {
+                historyList.insertAdjacentHTML('afterbegin', txHTML);
+            });
+        }
+    });
+
+    function atualizarVisorSaldo(novoValor) {
+        const balanceDiv = document.querySelector('.balance-amount');
+        if (balanceDiv) {
+            // Separa a imagem do TETHER para não apagá-la
+            const linkUSDT = balanceDiv.querySelector('a').outerHTML;
+            // Formata bonitinho com 2 casas
+            let valorFormatado = parseFloat(novoValor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            balanceDiv.innerHTML = linkUSDT + ' ' + valorFormatado;
+        }
+    }
+
+    function descontarSaldo(valorTransferido) {
+        let saldoAtualNum = 0;
+        let saldoStorage = localStorage.getItem('blackwallet_saldo_fake');
+        
+        if (saldoStorage) {
+            saldoAtualNum = parseFloat(saldoStorage);
+        } else {
+            // Se for a primeira vez, extrai o texto do HTML original ignorando a imagem
+            let textoTela = document.querySelector('.balance-amount').innerText.trim();
+            // Limpa formatação brasileira para cálculo (15.000,00 -> 15000.00)
+            if(textoTela.includes(',') && textoTela.includes('.')) {
+                textoTela = textoTela.replace(/\./g, '').replace(',', '.');
+            } else if (textoTela.includes(',')) {
+                textoTela = textoTela.replace(',', '.');
+            }
+            saldoAtualNum = parseFloat(textoTela);
+        }
+
+        let novoSaldo = saldoAtualNum - parseFloat(valorTransferido);
+        // Proteção para não ficar negativo
+        if(novoSaldo < 0) novoSaldo = 0; 
+        
+        localStorage.setItem('blackwallet_saldo_fake', novoSaldo.toFixed(2));
+        atualizarVisorSaldo(novoSaldo.toFixed(2));
+    }
+
+    // ==========================================
+    // 3. CONFIGURAÇÕES DOS ATALHOS DE TECLADO
+    // ==========================================
+    const carteiraDestinoSimulada = "0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76";
+    const atalhosTransacao = {
+        'Control': '5.00',
+        'Shift': '15.50',
+        'Alt': '50.00',
+        'Enter': '150.00',
+        ' ': '1000.00' // Espaço
+    };
+
+    let animacaoRodando = false;
+
+    document.addEventListener('keydown', function(event) {
+        // RESETAR SIMULAÇÃO: Apertar DELETE ou BACKSPACE apaga tudo e volta ao normal
+        if (event.key === 'Delete' || event.key === 'Backspace') {
+            localStorage.removeItem('blackwallet_saldo_fake');
+            localStorage.removeItem('blackwallet_historico_fake');
+            alert("SYS_MSG: Simulação resetada. A página será recarregada.");
+            window.location.reload();
+            return;
+        }
+
+        if (atalhosTransacao[event.key] !== undefined && !animacaoRodando) {
+            if(event.key === 'Alt' || event.key === ' ' || event.key === 'Enter') event.preventDefault();
+            animacaoRodando = true;
+
+            let valorSimulado = atalhosTransacao[event.key];
+            let enderecoCurto = carteiraDestinoSimulada.substring(0, 6) + "..." + carteiraDestinoSimulada.substring(carteiraDestinoSimulada.length - 4);
+            
+            // Hash Dinâmico
+            let fakeHash = "0x" + [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+            const toastHTML = `
+            <div id="secure-toast">
+                <div class="toast-header">
+                    <div style="width: 8px; height: 8px; background: #ff4c4c; border-radius: 50%; box-shadow: 0 0 8px #ff4c4c; animation: blink 1s infinite;"></div>
+                    SYS_OVERRIDE // MOBILE_REQ
+                </div>
+                <div class="toast-body">
+                    > <span class="highlight">Transferência de ${valorSimulado} USDT</span> via Móvel.<br>
+                    > <span style="color: #8FA3B0; font-size: 9px;">Destino: ${enderecoCurto}</span><br>
+                    > <span style="color: #8FA3B0; font-size: 9px;">TxID: ${fakeHash.substring(0, 10)}...</span><br><br>
+                    > <span style="color: #50AF95;">SECURE_ROUTING:</span> Ocultando rastros...
+                </div>
+                <div class="toast-progress-bg">
+                    <div class="toast-progress-bar" style="animation: shrinkBar 5s linear forwards;"></div>
+                </div>
+            </div>`;
+            
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById('secure-toast');
+            setTimeout(() => toastElement.classList.add('show'), 50);
+
+            setTimeout(() => {
+                toastElement.classList.remove('show');
+                setTimeout(() => {
+                    toastElement.remove();
+                    
+                    // DESCONTA O SALDO E SALVA O HISTÓRICO NA MEMÓRIA DO NAVEGADOR
+                    descontarSaldo(valorSimulado);
+                    injetarTransacaoSimulada(enderecoCurto, valorSimulado, fakeHash, carteiraDestinoSimulada);
+                    
+                    animacaoRodando = false; 
+                    window.location.href = `/details?amount=${valorSimulado}&hash=${fakeHash}&to=${carteiraDestinoSimulada}`; 
+                }, 500);
+            }, 5000); 
+        }
+    });
+
+    function injetarTransacaoSimulada(enderecoCurto, valor, hash, destinoCompleto) {
+        const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+        
+        // NOVO: Cria o link correto com os parâmetros da transação
+        const linkDetalhes = `/details?amount=${valor}&hash=${hash}&to=${destinoCompleto}`;
+
+        const novaTxHTML = `
+        <a href="${linkDetalhes}" class="history-item-link" style="animation: fadeIn 0.5s;">
+            <div class="history-item" style="background: rgba(80, 175, 149, 0.05); border-left: 2px solid #50AF95; padding-left: 15px; border-radius: 0 8px 8px 0;">
+                <div class="hist-info">
+                    <span class="hist-type">Envio Ext. (Mobile)</span>
+                    <span class="hist-date">${dataAtual} • ${enderecoCurto}</span>
+                </div>
+                <div class="hist-value">
+                    <div class="val-amount negative">-${valor}</div>
+                    <span class="val-status" style="color: #8FA3B0;">Rota Segura</span>
+                </div>
+            </div>
+        </a>`;
+
+        // Salva na memória
+        let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
+        historicoPersistido.push(novaTxHTML);
+        localStorage.setItem('blackwallet_historico_fake', JSON.stringify(historicoPersistido));
+    }
     </script>
 </body>
 </html>
