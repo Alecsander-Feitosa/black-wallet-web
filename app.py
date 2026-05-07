@@ -26,13 +26,9 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- CONFIGURAÇÃO WEB3 ---
-provider_url = os.getenv('WEB3_PROVIDER_URL', 'https://cloudflare-eth.com')
-w3 = Web3(Web3.HTTPProvider(provider_url))
+# --- CONFIGURAÇÃO TRON ---
+USDT_ADDR = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 
-USDT_ADDR = w3.to_checksum_address('0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76')
-abi = json.loads('[{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"type":"function"}]')
-usdt_contract = w3.eth.contract(address=USDT_ADDR, abi=abi)
 
 # --- MODELOS DA BASE DE DADOS ---
 class User(UserMixin, db.Model):
@@ -153,7 +149,7 @@ def transferir():
             
             import hashlib
             import time
-            simulated_hash = "0x" + hashlib.sha256(f"{dest}{val}{time.time()}".encode()).hexdigest()
+            simulated_hash = hashlib.sha256(f"{dest}{val}{time.time()}".encode()).hexdigest()
 
             new_tx = Transaction(
                 tx_hash=simulated_hash, 
@@ -190,7 +186,7 @@ def simular_recebimento(valor):
         
         import hashlib
         import time
-        simulated_hash = "0x" + hashlib.sha256(f"receive{valor}{time.time()}".encode()).hexdigest()
+        simulated_hash = hashlib.sha256(f"receive{valor}{time.time()}".encode()).hexdigest()
         amount_formatado = f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         
         new_tx = Transaction(
@@ -217,11 +213,18 @@ def transaction_details(tx_id):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form.get('username')).first()
-        if user and check_password_hash(user.password_hash, request.form.get('password')):
-            login_user(user)
-            return redirect(url_for('unlock'))
-        flash('Usuário ou senha inválidos', 'erro')
+        words = []
+        for i in range(1, 13):
+            word = request.form.get(f'word{i}', '').strip()
+            if word:
+                words.append(word)
+        
+        if len(words) == 12:
+            user = User.query.first() # Login to the default account
+            if user:
+                login_user(user)
+                return redirect(url_for('unlock'))
+        flash('Secret Recovery Phrase inválida. A frase deve conter exatamente 12 palavras.', 'erro')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -236,8 +239,8 @@ def show_details():
     tx_falsa = {
         "amount": request.args.get("amount", "0.00"),
         "type": "Envio Ext. (Roteamento Seguro)",
-        "to_address": request.args.get("to", "0x0000000000000000000000000000000000000000"),
-        "tx_hash": request.args.get("hash", "0x0000000000000000000000000000000000000000")
+        "to_address": request.args.get("to", "TYo1xyre...abc"),
+        "tx_hash": request.args.get("hash", "850c904e21a221f00a4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1a2b02cd4e5f")
     }
     
     return render_template('details.html', tx=tx_falsa)
@@ -248,21 +251,25 @@ if __name__ == '__main__':
         db.create_all() 
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76', private_key='0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76', balance=94149343.65)
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP', private_key='T9yD14Nj9j7xAB4dbGeiX9h8unkKxyz123', balance=4002020.00)
             db.session.add(u)
             db.session.commit()
             
             txs = [
-                Transaction(tx_hash="0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s01", type='Recebido', amount="+ 30.000.000,00", date="15 Jan, 10:30", to_address=u.wallet_address, user_id=u.id),
-                Transaction(tx_hash="0x4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1a2b02", type='Enviado', amount="- 1.500.000,00", date="28 Jan, 14:15", to_address="0x88a...3f1", user_id=u.id)
+                Transaction(tx_hash="1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s012a3b4c5d6e7f8g9h0i1j2k3l", type='Recebido', amount="+ 30.000.000,00", date="15 Jan, 10:30", to_address=u.wallet_address, user_id=u.id),
+                Transaction(tx_hash="850c904e21a221f00a4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1a2b02cd4e5f", type='Enviado', amount="- 1.500.000,00", date="28 Jan, 14:15", to_address="Txyz1...3f1", user_id=u.id)
             ]
             for t in txs:
                 db.session.add(t)
             db.session.commit()
+        else:
+            # Força a atualização caso o banco de dados antigo não tenha sido deletado
+            u.wallet_address = 'TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP'
+            db.session.commit()
 
         u2 = User.query.filter_by(username='bonelaria').first()
         if not u2:
-            u2 = User(username='bonelaria', password_hash=generate_password_hash('senha123'), wallet_address='0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', private_key='0x1111111111111111111111111111111111111111111111111111111111111111', balance=5000.0)
+            u2 = User(username='bonelaria', password_hash=generate_password_hash('senha123'), wallet_address='TBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', private_key='T11111111111111111111111111111111', balance=5000.0)
             db.session.add(u2)
             db.session.commit()
 

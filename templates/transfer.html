@@ -23,7 +23,7 @@
             background-size: 40px 40px; z-index: -1;
         }
 
-        .transfer-wrapper { width: 100%; max-width: 440px; padding: 20px; }
+        .transfer-wrapper { width: 100%; max-width: 440px; padding: 20px; position: relative; z-index: 1;}
 
         /* Barra de Status Superior */
         .system-status { 
@@ -116,23 +116,61 @@
             color: #ff4c4c; background: rgba(255,76,76,0.05); 
             padding: 12px; border-left: 2px solid #ff4c4c; margin-bottom: 25px;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10; backdrop-filter: blur(5px);
+            justify-content: center; align-items: center;
+        }
+        .modal-card {
+            background: #050507; border: 1px solid #50AF95; padding: 30px;
+            width: 300px; text-align: center; box-shadow: 0 0 30px rgba(80, 175, 149, 0.2);
+            position: relative;
+        }
+        .modal-card h2 {
+            font-family: 'JetBrains Mono', monospace; font-size: 14px;
+            color: #fff; margin-top: 0;
+        }
+        .pin-inputs {
+            display: flex; justify-content: center; gap: 8px; margin: 25px 0;
+        }
+        .pin-inputs input {
+            width: 35px; height: 45px; background: #0d0e12; border: 1px solid #1e2029;
+            color: #fff; font-size: 20px; text-align: center; font-family: 'JetBrains Mono', monospace;
+            border-radius: 4px; outline: none; transition: 0.3s;
+        }
+        .pin-inputs input:focus { border-color: #50AF95; }
+        .modal-buttons { display: flex; justify-content: space-between; gap: 10px; }
+        .btn-cancel {
+            flex: 1; background: transparent; border: 1px solid #444; color: #8FA3B0;
+            padding: 10px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            transition: 0.3s;
+        }
+        .btn-cancel:hover { border-color: #fff; color: #fff; }
+        .btn-confirm {
+            flex: 1; background: #50AF95; border: 1px solid #50AF95; color: #000;
+            padding: 10px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-confirm:hover { background: #3d8c75; }
     </style>
 </head>
 <body>
     <div class="transfer-wrapper">
         <div class="system-status">
-            <div class="status-indicator"><div class="status-dot"></div> Tx-Protocol: Active</div>
+            <div class="status-indicator"><div class="status-dot"></div> TRC20_Protocol: Active</div>
             <div>Enc: AES-256</div>
         </div>
 
         <div class="module-card">
             <div class="header-box">
                 <a href="/dashboard" class="btn-back"> < </a>
-                <h1>TX_TRANSFER_USDT</h1>
+                <h1>TX_TRANSFER_TRC20</h1>
             </div>
 
             <div class="source-info">
-                <div class="label-tiny">Source_Address_Identifier</div>
+                <div class="label-tiny">Source_Address (TRON)</div>
                 <div class="address-text">{{ endereco }}</div>
             </div>
 
@@ -144,11 +182,11 @@
               {% endif %}
             {% endwith %}
 
-            <form action="/transferir" method="POST">
+            <form action="/transferir" method="POST" id="transferForm">
                 <div class="input-group">
-                    <label>Destination_Node (Address)</label>
+                    <label>Destination_Node (TRON Address)</label>
                     <div class="input-wrapper">
-                        <input type="text" name="destino" placeholder="0x..." required autocomplete="off">
+                        <input type="text" name="destino" placeholder="T..." required autocomplete="off">
                     </div>
                 </div>
 
@@ -160,9 +198,66 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-execute">Execute_Broadcast</button>
+                <button type="button" class="btn-execute" onclick="requestAccess()">Execute_Broadcast</button>
             </form>
         </div>
     </div>
+
+    <!-- Modal de Pedido de Acesso (PIN) -->
+    <div class="modal-overlay" id="accessModal">
+        <div class="modal-card">
+            <h2>SECURITY VERIFICATION</h2>
+            <div style="font-size: 11px; color: #8FA3B0;">Insira seu PIN de 6 dígitos para autorizar a transação na rede TRON.</div>
+            
+            <div class="pin-inputs" id="pinContainer">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 0)" autofocus>
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 1)">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 2)">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 3)">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 4)">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 5)">
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="cancelAccess()">Cancel</button>
+                <button type="button" class="btn-confirm" onclick="confirmAccess()">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function requestAccess() {
+            // Verificar se os campos estão preenchidos antes de abrir o modal
+            const form = document.getElementById('transferForm');
+            if (form.checkValidity()) {
+                document.getElementById('accessModal').style.display = 'flex';
+                document.querySelector('.pin-inputs input').focus();
+            } else {
+                form.reportValidity();
+            }
+        }
+
+        function cancelAccess() {
+            document.getElementById('accessModal').style.display = 'none';
+            // Limpa os inputs
+            document.querySelectorAll('.pin-inputs input').forEach(input => input.value = '');
+        }
+
+        function confirmAccess() {
+            // Qualquer PIN é aceito para a simulação
+            document.getElementById('accessModal').style.display = 'none';
+            document.getElementById('transferForm').submit();
+        }
+
+        function moveToNext(element, index) {
+            if (element.value.length >= 1) {
+                const nextInput = document.querySelectorAll('.pin-inputs input')[index + 1];
+                if (nextInput) nextInput.focus();
+            } else if (element.value.length === 0 && event.key === 'Backspace') {
+                const prevInput = document.querySelectorAll('.pin-inputs input')[index - 1];
+                if (prevInput) prevInput.focus();
+            }
+        }
+    </script>
 </body>
 </html>

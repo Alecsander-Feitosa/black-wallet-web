@@ -4,44 +4,198 @@
     <meta charset="UTF-8">
     <title>Comprovante - Black Wallet</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .receipt-card { background: #121318; width: 400px; border-radius: 24px; border: 1px solid #2a2d3a; padding: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); text-align: center; }
-        .status-badge { background: rgba(80, 175, 149, 0.1); color: #50AF95; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        h1 { font-size: 24px; margin: 25px 0 10px 0; color: #fff; }
-        .sub-text { color: #8FA3B0; font-size: 14px; margin-bottom: 30px; }
-        .detail-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #1e2029; font-size: 14px; }
-        .detail-row:last-child { border-bottom: none; }
-        .label { color: #666; }
-        .value { color: #fff; font-weight: 500; word-break: break-all; text-align: right; max-width: 200px; }
-        .btn-back { display: block; margin-top: 35px; color: #50AF95; text-decoration: none; font-weight: 600; font-size: 14px; }
-        .btn-back:hover { color: #fff; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0a0a0c; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .receipt-card { 
+            background: #11131a; 
+            width: 100%;
+            max-width: 450px; 
+            border-radius: 16px; 
+            border: 1px solid #1e2029; 
+            padding: 40px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .status-badge { 
+            background: rgba(80, 175, 149, 0.1); 
+            color: #50AF95; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px; height: 8px;
+            background-color: #50AF95;
+            border-radius: 50%;
+        }
+
+        h1 { 
+            font-size: 20px; 
+            margin: 20px 0 5px 0; 
+            color: #fff; 
+        }
+
+        .sub-text { 
+            color: #8FA3B0; 
+            font-size: 13px; 
+            margin-bottom: 0; 
+        }
+
+        .amount-display {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin: 20px 0 30px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .amount-display span {
+            font-size: 16px;
+            color: #50AF95;
+        }
+
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 16px 0; 
+            border-bottom: 1px solid #1e2029; 
+            font-size: 13px; 
+            align-items: flex-start;
+        }
+
+        .detail-row:last-child { 
+            border-bottom: none; 
+        }
+
+        .label { 
+            color: #8FA3B0; 
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        .value { 
+            color: #fff; 
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all; 
+            text-align: right; 
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .value.success {
+            color: #50AF95;
+        }
+
+        .btn-back { 
+            display: block; 
+            margin-top: 40px; 
+            background: #1e2029;
+            color: #fff; 
+            text-align: center;
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 14px; 
+            padding: 15px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover { 
+            background: #2a2d3a; 
+        }
+
+        /* Tron Logo Fake */
+        .network-tag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #a0aab5;
+            margin-top: -15px;
+            margin-bottom: 30px;
+        }
+        .network-tag span {
+            font-family: 'JetBrains Mono', monospace;
+            background: #ff001322;
+            color: #ff4d4d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="receipt-card">
-        <span class="status-badge">Concluído</span>
-        <h1>Detalhes da Transação</h1>
-        <p class="sub-text">Transferência Interna Blockchain</p>
+        <div class="header-section">
+            <div class="status-badge">SUCCESS</div>
+            <h1>Transaction Receipt</h1>
+            <p class="sub-text">TRC20 Token Transfer</p>
+        </div>
+
+        <div class="amount-display">
+            {{ tx.amount.replace('+', '').replace('-', '').strip() }} <span>USDT</span>
+        </div>
+
+        <div class="network-tag">
+            Network: <span>TRON</span>
+        </div>
 
         <div class="detail-row">
-            <span class="label">ID da Transação</span>
+            <span class="label">Hash</span>
             <span class="value">{{ tx.tx_hash }}</span>
         </div>
         <div class="detail-row">
-            <span class="label">Tipo</span>
+            <span class="label">Result</span>
+            <span class="value success">CONFIRMED</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Type</span>
             <span class="value">{{ tx.type }}</span>
         </div>
         <div class="detail-row">
-            <span class="label">Valor</span>
-            <span class="value">{{ tx.amount }} USDT</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Destino</span>
+            <span class="label">To Address</span>
             <span class="value">{{ tx.to_address }}</span>
         </div>
+        <div class="detail-row">
+            <span class="label">Network Fee</span>
+            <span class="value">0 TRX</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Energy Cost</span>
+            <span class="value">0</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Bandwidth</span>
+            <span class="value">345 Bandwidth</span>
+        </div>
         
-        <a href="/dashboard" class="btn-back">← Voltar para a Carteira</a>
+        <a href="/dashboard" class="btn-back">Return to Dashboard</a>
     </div>
 </body>
 </html>

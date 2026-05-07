@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Black Wallet</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #0a0a0c; 
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0c;
             color: white;
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start; 
-            min-height: 100vh; 
-            margin: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
             padding: 40px 20px;
         }
 
@@ -28,273 +29,383 @@
             height: 180px;
             position: relative;
         }
-        .wallet-app { 
-            background: #121318; 
+
+        .wallet-app {
+            background: #121318;
             width: 100%;
-            max-width: 450px; 
-            border-radius: 28px; 
-            box-shadow: 0 40px 100px rgba(0,0,0,0.7); 
-            border: 1px solid #2a2d3a; 
+            max-width: 450px;
+            border-radius: 28px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+            border: 1px solid #2a2d3a;
             padding: 30px;
             box-sizing: border-box;
         }
 
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 30px; 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
-        .logo { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
-        .logo span { color: #50AF95; }
-        .logout { 
-            color: #8FA3B0; 
-            text-decoration: none; 
-            font-size: 13px; 
-            font-weight: 500; 
-            opacity: 0.7; 
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #50AF95;
+        }
+
+        .logout {
+            color: #8FA3B0;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.7;
             transition: 0.3s;
         }
-        .logout:hover { opacity: 1; color: #ff4c4c; }
 
-        .balance-card { 
+        .logout:hover {
+            opacity: 1;
+            color: #ff4c4c;
+        }
+
+        .balance-card {
             background: linear-gradient(135deg, #1b1e28 0%, #0a0a0c 100%);
-            border: 1px solid #2a2d3a; 
-            border-radius: 24px; 
-            padding: 35px 20px; 
-            margin-bottom: 35px; 
+            border: 1px solid #2a2d3a;
+            border-radius: 24px;
+            padding: 35px 20px;
+            margin-bottom: 35px;
             text-align: center;
         }
-        .balance-label { 
-            font-size: 11px; 
-            color: #8FA3B0; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            margin-bottom: 15px; 
-            display: block; 
+
+        .balance-label {
+            font-size: 11px;
+            color: #8FA3B0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: block;
         }
-        .balance-amount { 
-            font-size: 34px; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 12px; 
-            margin: 0; 
+
+        .balance-amount {
+            font-size: 34px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0;
         }
-        .usdt-logo { 
-            width: 36px; 
-            height: 36px; 
+
+        .usdt-logo {
+            width: 36px;
+            height: 36px;
             cursor: pointer;
             transition: transform 0.2s ease-in-out;
         }
+
         .usdt-logo:hover {
             transform: scale(1.15);
         }
-        
-        .address-pill { 
-            background: #121318; 
-            border: 1px solid #2a2d3a; 
-            padding: 10px 18px; 
-            border-radius: 30px; 
-            font-size: 11px; 
-            color: #8FA3B0; 
+
+        .address-pill {
+            background: #121318;
+            border: 1px solid #2a2d3a;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 11px;
+            color: #8FA3B0;
             margin-top: 25px;
-            display: inline-flex; 
-            align-items: center; 
-            cursor: pointer; 
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
             transition: 0.2s;
         }
-        .address-pill:hover { border-color: #50AF95; color: #fff; }
-        .address-pill span { color: #50AF95; margin-left: 8px; font-weight: bold; }
 
-        .market-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            margin-bottom: 30px; 
+        .address-pill:hover {
+            border-color: #50AF95;
+            color: #fff;
         }
-        .market-item { 
-            background: #1b1e28; 
-            padding: 15px; 
-            border-radius: 16px; 
-            border: 1px solid #2a2d3a; 
+
+        .address-pill span {
+            color: #50AF95;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .market-item {
+            background: #1b1e28;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #2a2d3a;
             text-align: left;
         }
-        .market-label { font-size: 10px; color: #8FA3B0; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .market-value { font-size: 14px; font-weight: 600; color: #fff; }
-        .brl-highlight { color: #28a745; }
 
-        .section-title { 
-            font-size: 13px; 
-            font-weight: 600; 
-            margin-bottom: 18px; 
-            color: #8FA3B0; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
+        .market-label {
+            font-size: 10px;
+            color: #8FA3B0;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
         }
-        .input-group { 
-            background: #0a0a0c; 
-            border: 1px solid #2a2d3a; 
-            border-radius: 16px; 
-            padding: 4px; 
-            margin-bottom: 15px; 
-            display: flex; 
-            align-items: center; 
+
+        .market-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
         }
-        .input-group input { 
-            background: transparent; 
-            border: none; 
-            color: white; 
-            padding: 16px; 
-            width: 100%; 
-            font-size: 14px; 
-            outline: none; 
+
+        .brl-highlight {
+            color: #28a745;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #8FA3B0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .input-group {
+            background: #0a0a0c;
+            border: 1px solid #2a2d3a;
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 16px;
+            width: 100%;
+            font-size: 14px;
+            outline: none;
             font-family: 'Inter', sans-serif;
         }
-        .usdt-tag { color: #50AF95; font-weight: 700; font-size: 13px; padding-right: 20px; }
-        
-        .btn-send { 
-            background-color: #50AF95; 
-            color: #fff; 
-            border: none; 
-            padding: 18px; 
-            border-radius: 16px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 16px; 
-            font-weight: 600; 
+
+        .usdt-tag {
+            color: #50AF95;
+            font-weight: 700;
+            font-size: 13px;
+            padding-right: 20px;
+        }
+
+        .btn-send {
+            background-color: #50AF95;
+            color: #fff;
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
             transition: 0.3s;
             margin-bottom: 40px;
         }
-        .btn-send:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 10px 20px rgba(80, 175, 149, 0.2); 
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(80, 175, 149, 0.2);
             background-color: #42947e;
         }
 
-        .history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item-link { text-decoration: none; color: inherit; display: block; }
-        .history-item { 
-            display: flex; 
-            justify-content: space-between; 
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 20px 0; 
+            padding: 20px 0;
             border-bottom: 1px solid #1e2029;
             transition: 0.2s;
         }
-        .history-item:hover { transform: translateX(5px); }
-        .history-item:last-child { border-bottom: none; }
-        
-        .hist-info { display: flex; flex-direction: column; }
-        .hist-type { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-        .hist-date { font-size: 11px; color: #555; }
-        
-        .hist-value { text-align: right; }
-        .val-amount { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-        .val-status { 
-            font-size: 10px; 
-            color: #50AF95; 
-            background: rgba(80, 175, 149, 0.1); 
-            padding: 3px 8px; 
-            border-radius: 6px; 
+
+        .history-item:hover {
+            transform: translateX(5px);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .hist-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hist-type {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .hist-date {
+            font-size: 11px;
+            color: #555;
+        }
+
+        .hist-value {
+            text-align: right;
+        }
+
+        .val-amount {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .val-status {
+            font-size: 10px;
+            color: #50AF95;
+            background: rgba(80, 175, 149, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
             font-weight: 600;
         }
-        
-        .positive { color: #28a745; }
-        .negative { color: #ff4c4c; }
 
-        .flash-msg { 
-            margin-top: 20px; 
-            font-size: 13px; 
-            text-align: center; 
-            border-radius: 12px; 
-            padding: 14px; 
-            background: rgba(255,255,255,0.03);
-            border: 1px solid #2a2d3a; 
+        .positive {
+            color: #28a745;
         }
-        .flash-sucesso { color: #28a745; border-color: rgba(40, 167, 69, 0.3); }
-        .flash-erro { color: #ff4c4c; border-color: rgba(255, 76, 76, 0.3); }
+
+        .negative {
+            color: #ff4c4c;
+        }
+
+        .flash-msg {
+            margin-top: 20px;
+            font-size: 13px;
+            text-align: center;
+            border-radius: 12px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #2a2d3a;
+        }
+
+        .flash-sucesso {
+            color: #28a745;
+            border-color: rgba(40, 167, 69, 0.3);
+        }
+
+        .flash-erro {
+            color: #ff4c4c;
+            border-color: rgba(255, 76, 76, 0.3);
+        }
 
 
         /* Oculta a notificação inicialmente fora da tela */
-    #secure-toast {
-        position: fixed;
-        top: 30px;
-        right: -400px; /* Fora da tela */
-        width: 320px;
-        background: #050507;
-        border: 1px solid #50AF95;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(80, 175, 149, 0.2);
-        border-radius: 12px;
-        padding: 20px;
-        z-index: 9999;
-        font-family: 'JetBrains Mono', monospace;
-        transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+        #secure-toast {
+            position: fixed;
+            top: 30px;
+            right: -400px;
+            /* Fora da tela */
+            width: 320px;
+            background: #050507;
+            border: 1px solid #50AF95;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(80, 175, 149, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 9999;
+            font-family: 'JetBrains Mono', monospace;
+            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-    /* Classe que faz a notificação deslizar para dentro */
-    #secure-toast.show {
-        right: 30px;
-    }
+        /* Classe que faz a notificação deslizar para dentro */
+        #secure-toast.show {
+            right: 30px;
+        }
 
-    .toast-header {
-        color: #ff4c4c; /* Vermelho para chamar atenção */
-        font-size: 12px;
-        font-weight: bold;
-        margin-bottom: 12px;
-        border-bottom: 1px solid #16181f;
-        padding-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+        .toast-header {
+            color: #ff4c4c;
+            /* Vermelho para chamar atenção */
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #16181f;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .toast-body {
-        font-size: 10px;
-        color: #8FA3B0;
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
+        .toast-body {
+            font-size: 10px;
+            color: #8FA3B0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
 
-    .toast-body span.highlight {
-        color: #fff;
-        font-weight: bold;
-    }
+        .toast-body span.highlight {
+            color: #fff;
+            font-weight: bold;
+        }
 
-    .toast-progress-bg {
-        width: 100%;
-        height: 3px;
-        background: #16181f;
-        border-radius: 2px;
-        overflow: hidden;
-    }
+        .toast-progress-bg {
+            width: 100%;
+            height: 3px;
+            background: #16181f;
+            border-radius: 2px;
+            overflow: hidden;
+        }
 
-    /* Animação de 5 segundos cravados */
-    .toast-progress-bar {
-        height: 100%;
-        width: 100%;
-        background: #50AF95;
-        transform-origin: left;
-    }
+        /* Animação de 5 segundos cravados */
+        .toast-progress-bar {
+            height: 100%;
+            width: 100%;
+            background: #50AF95;
+            transform-origin: left;
+        }
 
-    @keyframes shrinkBar {
-        from { transform: scaleX(1); }
-        to { transform: scaleX(0); }
-    }
+        @keyframes shrinkBar {
+            from {
+                transform: scaleX(1);
+            }
+
+            to {
+                transform: scaleX(0);
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="wallet-app">
         <div class="header">
             <div class="logo">BLACK<span>WALLET</span></div>
             <a href="/logout" class="logout">Desconectar</a>
         </div>
-        
+
         <div class="balance-card">
             <span class="balance-label">Patrimônio em USDT</span>
             <div class="balance-amount">
-                <a href="https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7" target="_blank" title="Ver Contrato Oficial do USDT no Etherscan" style="display: flex; align-items: center;">
+                <a href="https://tronscan.org/#/token20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" target="_blank"
+                    title="Ver Contrato Oficial do USDT no Tronscan" style="display: flex; align-items: center;">
                     <img src="{{ url_for('static', filename='tether-usdt-logo.svg') }}" alt="USDT" class="usdt-logo">
                 </a>
                 {{ saldo }}
@@ -303,7 +414,7 @@
                 {{ endereco[:10] }}...{{ endereco[-8:] }} <span>COPIAR</span>
             </div>
         </div>
-        
+
         <div class="market-grid">
             <div class="market-item" style="grid-column: span 2;">
                 <span class="market-label">Valor Estimado em Real (BRL)</span>
@@ -325,10 +436,12 @@
         </div>
 
         <div style="display: flex; gap: 15px; margin-bottom: 40px;">
-            <a href="/receber" class="btn-send" style="text-align: center; text-decoration: none; box-sizing: border-box; background-color: transparent; color: #50AF95; border: 1px solid #50AF95; margin-bottom: 0;">
+            <a href="/receber" class="btn-send"
+                style="text-align: center; text-decoration: none; box-sizing: border-box; background-color: transparent; color: #50AF95; border: 1px solid #50AF95; margin-bottom: 0;">
                 Receber
             </a>
-            <a href="/transferir" class="btn-send" style="text-align: center; text-decoration: none; box-sizing: border-box; background-color: #50AF95; color: white; margin-bottom: 0;">
+            <a href="/transferir" class="btn-send"
+                style="text-align: center; text-decoration: none; box-sizing: border-box; background-color: #50AF95; color: white; margin-bottom: 0;">
                 Enviar
             </a>
         </div>
@@ -354,159 +467,159 @@
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash-msg flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-    // ==========================================
-    // 1. CÓDIGO DO GRÁFICO E COPIAR ENDEREÇO
-    // ==========================================
-    function copiarEndereco() {
-        const enderecoCompleto = "{{ endereco }}";
-        navigator.clipboard.writeText(enderecoCompleto).then(() => {
-            const btnSpan = document.querySelector('.address-pill span');
-            const originalText = btnSpan.innerText;
-            btnSpan.innerText = "COPIADO!";
-            btnSpan.style.color = "#28a745";
-            
-            setTimeout(() => { 
-                btnSpan.innerText = originalText; 
-                btnSpan.style.color = "#50AF95";
-            }, 2000);
-        }).catch(err => alert('Erro ao copiar endereço.'));
-    }
+        // ==========================================
+        // 1. CÓDIGO DO GRÁFICO E COPIAR ENDEREÇO
+        // ==========================================
+        function copiarEndereco() {
+            const enderecoCompleto = "{{ endereco }}";
+            navigator.clipboard.writeText(enderecoCompleto).then(() => {
+                const btnSpan = document.querySelector('.address-pill span');
+                const originalText = btnSpan.innerText;
+                btnSpan.innerText = "COPIADO!";
+                btnSpan.style.color = "#28a745";
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const canvasElement = document.getElementById('evolutionChart');
-        if (canvasElement) {
-            const ctx = canvasElement.getContext('2d');
-            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(80, 175, 149, 0.4)'); 
-            gradient.addColorStop(1, 'rgba(80, 175, 149, 0.0)');
+                setTimeout(() => {
+                    btnSpan.innerText = originalText;
+                    btnSpan.style.color = "#50AF95";
+                }, 2000);
+            }).catch(err => alert('Erro ao copiar endereço.'));
+        }
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ chart_labels | tojson }},
-                    datasets: [{
-                        label: 'Saldo em USDT', data: {{ chart_data | tojson }},
-                        borderColor: '#50AF95', backgroundColor: gradient,
-                        borderWidth: 2, pointBackgroundColor: '#0a0a0c',
-                        pointBorderColor: '#50AF95', fill: true, tension: 0.4 
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvasElement = document.getElementById('evolutionChart');
+            if (canvasElement) {
+                const ctx = canvasElement.getContext('2d');
+                let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(80, 175, 149, 0.4)');
+                gradient.addColorStop(1, 'rgba(80, 175, 149, 0.0)');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: 'Saldo em USDT', data: {{ chart_data | tojson }},
+            borderColor: '#50AF95', backgroundColor: gradient,
+            borderWidth: 2, pointBackgroundColor: '#0a0a0c',
+            pointBorderColor: '#50AF95', fill: true, tension: 0.4 
                     }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { display: false }, 
-                        x: { grid: { display: false }, ticks: { color: '#8FA3B0' } }
-                    }
-                }
-            });
-        }
-    });
-
-    // ==========================================
-    // 2. SISTEMA DE PERSISTÊNCIA VISUAL (A MÁGICA)
-    // ==========================================
-    document.addEventListener("DOMContentLoaded", function() {
-        // Carrega o saldo modificado, se existir
-        let saldoPersistido = localStorage.getItem('blackwallet_saldo_fake');
-        if (saldoPersistido) {
-            atualizarVisorSaldo(saldoPersistido);
-        }
-
-        // Carrega as transações falsas no histórico
-        let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
-        const historyList = document.querySelector('.history-list');
-        if (historyList && historicoPersistido.length > 0) {
-            // Inverte para colocar as mais recentes no topo
-            historicoPersistido.reverse().forEach(txHTML => {
-                historyList.insertAdjacentHTML('afterbegin', txHTML);
-            });
-        }
-    });
-
-    function atualizarVisorSaldo(novoValor) {
-        const balanceDiv = document.querySelector('.balance-amount');
-        if (balanceDiv) {
-            // Separa a imagem do TETHER para não apagá-la
-            const linkUSDT = balanceDiv.querySelector('a').outerHTML;
-            // Formata bonitinho com 2 casas
-            let valorFormatado = parseFloat(novoValor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
-            balanceDiv.innerHTML = linkUSDT + ' ' + valorFormatado;
-        }
-    }
-
-    function descontarSaldo(valorTransferido) {
-        let saldoAtualNum = 0;
-        let saldoStorage = localStorage.getItem('blackwallet_saldo_fake');
-        
-        if (saldoStorage) {
-            saldoAtualNum = parseFloat(saldoStorage);
-        } else {
-            // Se for a primeira vez, extrai o texto do HTML original ignorando a imagem
-            let textoTela = document.querySelector('.balance-amount').innerText.trim();
-            // Limpa formatação brasileira para cálculo (15.000,00 -> 15000.00)
-            if(textoTela.includes(',') && textoTela.includes('.')) {
-                textoTela = textoTela.replace(/\./g, '').replace(',', '.');
-            } else if (textoTela.includes(',')) {
-                textoTela = textoTela.replace(',', '.');
+            options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { display: false },
+                x: { grid: { display: false }, ticks: { color: '#8FA3B0' } }
             }
-            saldoAtualNum = parseFloat(textoTela);
+        }
+            });
+        }
+    });
+
+        // ==========================================
+        // 2. SISTEMA DE PERSISTÊNCIA VISUAL (A MÁGICA)
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", function () {
+            // Carrega o saldo modificado, se existir
+            let saldoPersistido = localStorage.getItem('blackwallet_saldo_fake');
+            if (saldoPersistido) {
+                atualizarVisorSaldo(saldoPersistido);
+            }
+
+            // Carrega as transações falsas no histórico
+            let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
+            const historyList = document.querySelector('.history-list');
+            if (historyList && historicoPersistido.length > 0) {
+                // Inverte para colocar as mais recentes no topo
+                historicoPersistido.reverse().forEach(txHTML => {
+                    historyList.insertAdjacentHTML('afterbegin', txHTML);
+                });
+            }
+        });
+
+        function atualizarVisorSaldo(novoValor) {
+            const balanceDiv = document.querySelector('.balance-amount');
+            if (balanceDiv) {
+                // Separa a imagem do TETHER para não apagá-la
+                const linkUSDT = balanceDiv.querySelector('a').outerHTML;
+                // Formata bonitinho com 2 casas
+                let valorFormatado = parseFloat(novoValor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                balanceDiv.innerHTML = linkUSDT + ' ' + valorFormatado;
+            }
         }
 
-        let novoSaldo = saldoAtualNum - parseFloat(valorTransferido);
-        // Proteção para não ficar negativo
-        if(novoSaldo < 0) novoSaldo = 0; 
-        
-        localStorage.setItem('blackwallet_saldo_fake', novoSaldo.toFixed(2));
-        atualizarVisorSaldo(novoSaldo.toFixed(2));
-    }
+        function descontarSaldo(valorTransferido) {
+            let saldoAtualNum = 0;
+            let saldoStorage = localStorage.getItem('blackwallet_saldo_fake');
 
-    // ==========================================
-    // 3. CONFIGURAÇÕES DOS ATALHOS DE TECLADO
-    // ==========================================
-    const carteiraDestinoSimulada = "0x3fe705e2FFcaEe8d7287de047DeF35Db3e794C76";
-    const atalhosTransacao = {
-        'Control': '5.00',
-        'Shift': '15.50',
-        'Alt': '50.00',
-        'Enter': '150.00',
-        ' ': '1000.00' // Espaço
-    };
+            if (saldoStorage) {
+                saldoAtualNum = parseFloat(saldoStorage);
+            } else {
+                // Se for a primeira vez, extrai o texto do HTML original ignorando a imagem
+                let textoTela = document.querySelector('.balance-amount').innerText.trim();
+                // Limpa formatação brasileira para cálculo (15.000,00 -> 15000.00)
+                if (textoTela.includes(',') && textoTela.includes('.')) {
+                    textoTela = textoTela.replace(/\./g, '').replace(',', '.');
+                } else if (textoTela.includes(',')) {
+                    textoTela = textoTela.replace(',', '.');
+                }
+                saldoAtualNum = parseFloat(textoTela);
+            }
 
-    let animacaoRodando = false;
+            let novoSaldo = saldoAtualNum - parseFloat(valorTransferido);
+            // Proteção para não ficar negativo
+            if (novoSaldo < 0) novoSaldo = 0;
 
-    document.addEventListener('keydown', function(event) {
-        // RESETAR SIMULAÇÃO: Apertar DELETE ou BACKSPACE apaga tudo e volta ao normal
-        if (event.key === 'Delete' || event.key === 'Backspace') {
-            localStorage.removeItem('blackwallet_saldo_fake');
-            localStorage.removeItem('blackwallet_historico_fake');
-            alert("SYS_MSG: Simulação resetada. A página será recarregada.");
-            window.location.reload();
-            return;
+            localStorage.setItem('blackwallet_saldo_fake', novoSaldo.toFixed(2));
+            atualizarVisorSaldo(novoSaldo.toFixed(2));
         }
 
-        if (atalhosTransacao[event.key] !== undefined && !animacaoRodando) {
-            if(event.key === 'Alt' || event.key === ' ' || event.key === 'Enter') event.preventDefault();
-            animacaoRodando = true;
+        // ==========================================
+        // 3. CONFIGURAÇÕES DOS ATALHOS DE TECLADO
+        // ==========================================
+        const carteiraDestinoSimulada = "TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP";
+        const atalhosTransacao = {
+            'Control': '5.00',
+            'Shift': '15.50',
+            'Alt': '50.00',
+            'Enter': '150.00',
+            ' ': '1000.00' // Espaço
+        };
 
-            let valorSimulado = atalhosTransacao[event.key];
-            let enderecoCurto = carteiraDestinoSimulada.substring(0, 6) + "..." + carteiraDestinoSimulada.substring(carteiraDestinoSimulada.length - 4);
-            
-            // Hash Dinâmico
-            let fakeHash = "0x" + [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        let animacaoRodando = false;
 
-            const toastHTML = `
+        document.addEventListener('keydown', function (event) {
+            // RESETAR SIMULAÇÃO: Apertar DELETE ou BACKSPACE apaga tudo e volta ao normal
+            if (event.key === 'Delete' || event.key === 'Backspace') {
+                localStorage.removeItem('blackwallet_saldo_fake');
+                localStorage.removeItem('blackwallet_historico_fake');
+                alert("SYS_MSG: Simulação resetada. A página será recarregada.");
+                window.location.reload();
+                return;
+            }
+
+            if (atalhosTransacao[event.key] !== undefined && !animacaoRodando) {
+                if (event.key === 'Alt' || event.key === ' ' || event.key === 'Enter') event.preventDefault();
+                animacaoRodando = true;
+
+                let valorSimulado = atalhosTransacao[event.key];
+                let enderecoCurto = carteiraDestinoSimulada.substring(0, 6) + "..." + carteiraDestinoSimulada.substring(carteiraDestinoSimulada.length - 4);
+
+                // Hash Dinâmico TRON (64 caracteres hex)
+                let fakeHash = [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+                const toastHTML = `
             <div id="secure-toast">
                 <div class="toast-header">
                     <div style="width: 8px; height: 8px; background: #ff4c4c; border-radius: 50%; box-shadow: 0 0 8px #ff4c4c; animation: blink 1s infinite;"></div>
@@ -522,34 +635,34 @@
                     <div class="toast-progress-bar" style="animation: shrinkBar 5s linear forwards;"></div>
                 </div>
             </div>`;
-            
-            document.body.insertAdjacentHTML('beforeend', toastHTML);
-            const toastElement = document.getElementById('secure-toast');
-            setTimeout(() => toastElement.classList.add('show'), 50);
 
-            setTimeout(() => {
-                toastElement.classList.remove('show');
+                document.body.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById('secure-toast');
+                setTimeout(() => toastElement.classList.add('show'), 50);
+
                 setTimeout(() => {
-                    toastElement.remove();
-                    
-                    // DESCONTA O SALDO E SALVA O HISTÓRICO NA MEMÓRIA DO NAVEGADOR
-                    descontarSaldo(valorSimulado);
-                    injetarTransacaoSimulada(enderecoCurto, valorSimulado, fakeHash, carteiraDestinoSimulada);
-                    
-                    animacaoRodando = false; 
-                    window.location.href = `/details?amount=${valorSimulado}&hash=${fakeHash}&to=${carteiraDestinoSimulada}`; 
-                }, 500);
-            }, 5000); 
-        }
-    });
+                    toastElement.classList.remove('show');
+                    setTimeout(() => {
+                        toastElement.remove();
 
-    function injetarTransacaoSimulada(enderecoCurto, valor, hash, destinoCompleto) {
-        const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
-        
-        // NOVO: Cria o link correto com os parâmetros da transação
-        const linkDetalhes = `/details?amount=${valor}&hash=${hash}&to=${destinoCompleto}`;
+                        // DESCONTA O SALDO E SALVA O HISTÓRICO NA MEMÓRIA DO NAVEGADOR
+                        descontarSaldo(valorSimulado);
+                        injetarTransacaoSimulada(enderecoCurto, valorSimulado, fakeHash, carteiraDestinoSimulada);
 
-        const novaTxHTML = `
+                        animacaoRodando = false;
+                        window.location.href = `/details?amount=${valorSimulado}&hash=${fakeHash}&to=${carteiraDestinoSimulada}`;
+                    }, 500);
+                }, 5000);
+            }
+        });
+
+        function injetarTransacaoSimulada(enderecoCurto, valor, hash, destinoCompleto) {
+            const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            // NOVO: Cria o link correto com os parâmetros da transação
+            const linkDetalhes = `/details?amount=${valor}&hash=${hash}&to=${destinoCompleto}`;
+
+            const novaTxHTML = `
         <a href="${linkDetalhes}" class="history-item-link" style="animation: fadeIn 0.5s;">
             <div class="history-item" style="background: rgba(80, 175, 149, 0.05); border-left: 2px solid #50AF95; padding-left: 15px; border-radius: 0 8px 8px 0;">
                 <div class="hist-info">
@@ -563,11 +676,12 @@
             </div>
         </a>`;
 
-        // Salva na memória
-        let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
-        historicoPersistido.push(novaTxHTML);
-        localStorage.setItem('blackwallet_historico_fake', JSON.stringify(historicoPersistido));
-    }
+            // Salva na memória
+            let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
+            historicoPersistido.push(novaTxHTML);
+            localStorage.setItem('blackwallet_historico_fake', JSON.stringify(historicoPersistido));
+        }
     </script>
 </body>
+
 </html>
