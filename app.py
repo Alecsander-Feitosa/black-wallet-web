@@ -70,7 +70,7 @@ def dashboard():
     total_usdt = current_user.balance
     endereco_visivel = current_user.wallet_address 
 
-    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).all()
+    transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).limit(4).all()
     
     import random
     from datetime import timedelta
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         db.create_all() 
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TRSKhXD5qSekLUxfwYxR1zA5kwTLhke2Rx', private_key='T9yD14Nj9j7xAB4dbGeiX9h8unkKxyz123', balance=94000000.00)
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TRSKhXD5qSekLUxfwYxR1zA5kwTLhke2Rx', private_key='T9yD14Nj9j7xAB4dbGeiX9h8unkKxyz123', balance=94149343.65)
             db.session.add(u)
             db.session.commit()
             
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         else:
             # Força a atualização caso o banco de dados antigo não tenha sido deletado
             u.wallet_address = 'TRSKhXD5qSekLUxfwYxR1zA5kwTLhke2Rx'
-            u.balance = 94000000.00
+            u.balance = 94149343.65
             db.session.commit()
 
         u2 = User.query.filter_by(username='bonelaria').first()

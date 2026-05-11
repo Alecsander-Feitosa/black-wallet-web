@@ -531,21 +531,9 @@
         // 2. SISTEMA DE PERSISTÊNCIA VISUAL (A MÁGICA)
         // ==========================================
         document.addEventListener("DOMContentLoaded", function () {
-            // Carrega o saldo modificado, se existir
-            let saldoPersistido = localStorage.getItem('blackwallet_saldo_fake');
-            if (saldoPersistido) {
-                atualizarVisorSaldo(saldoPersistido);
-            }
-
-            // Carrega as transações falsas no histórico
-            let historicoPersistido = JSON.parse(localStorage.getItem('blackwallet_historico_fake') || '[]');
-            const historyList = document.querySelector('.history-list');
-            if (historyList && historicoPersistido.length > 0) {
-                // Inverte para colocar as mais recentes no topo
-                historicoPersistido.reverse().forEach(txHTML => {
-                    historyList.insertAdjacentHTML('afterbegin', txHTML);
-                });
-            }
+            // Limpa transações antigas do localStorage para não acumular
+            localStorage.removeItem('blackwallet_historico_fake');
+            localStorage.removeItem('blackwallet_saldo_fake');
         });
 
         function atualizarVisorSaldo(novoValor) {
