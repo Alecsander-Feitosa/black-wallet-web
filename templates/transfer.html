@@ -183,6 +183,7 @@
             {% endwith %}
 
             <form action="/transferir" method="POST" id="transferForm">
+                <input type="hidden" name="pin" id="hiddenPin">
                 <div class="input-group">
                     <label>Destination_Node (TRON Address)</label>
                     <div class="input-wrapper">
@@ -244,7 +245,14 @@
         }
 
         function confirmAccess() {
-            // Qualquer PIN é aceito para a simulação
+            let pin = "";
+            document.querySelectorAll('.pin-inputs input').forEach(input => pin += input.value);
+            if (pin.length < 6) {
+                alert("Por favor, preencha os 6 dígitos do PIN.");
+                return;
+            }
+            document.getElementById('hiddenPin').value = pin;
+            
             document.getElementById('accessModal').style.display = 'none';
             document.getElementById('transferForm').submit();
         }

@@ -38,6 +38,7 @@ class User(UserMixin, db.Model):
     wallet_address = db.Column(db.String(42), unique=True)
     private_key = db.Column(db.String(100))
     balance = db.Column(db.Float, default=0.0) 
+    transfer_password = db.Column(db.String(150), default='123456')
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 
 class Transaction(db.Model):
@@ -71,24 +72,40 @@ def dashboard():
 
     transacoes = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.id.desc()).all()
     
-    chart_labels = ['Hoje']
-    chart_data = [total_usdt]
-    temp_balance = total_usdt
+    import random
+    from datetime import timedelta
+    
+    chart_labels = []
+    chart_data = []
 
-    for tx in transacoes:
-        valor_str = tx.amount.replace('+', '').replace('-', '').replace('.', '').replace(',', '.')
-        try:
-            valor_float = float(valor_str.strip())
-            if 'Recebido' in tx.type:
-                temp_balance -= valor_float
-            else:
-                temp_balance += valor_float
+    # Gerar uma evolução de 45 dias extremamente realista e orgânica
+    dias_simulacao = 45
+    start_val = total_usdt * 0.15 # Começa com 15% do valor atual
+    end_val = total_usdt
+    
+    # Usar um seed fixo com base no usuário e no mês atual para o gráfico não ficar piscando (mudando o formato a cada F5)
+    hoje = datetime.now()
+    random.seed(current_user.id + hoje.year + hoje.month)
+
+    for i in range(dias_simulacao, -1, -1):
+        dia_mes = (hoje - timedelta(days=i)).strftime("%d %b")
+        chart_labels.append(dia_mes)
+        
+        if i == dias_simulacao:
+            chart_data.append(start_val)
+        elif i == 0:
+            chart_data.append(end_val)
+        else:
+            # Curva de crescimento com progressão que acelera mais no final
+            progress = (dias_simulacao - i) / float(dias_simulacao)
+            base_val = start_val + (end_val - start_val) * (progress ** 1.8)
             
-            dia_mes = tx.date.split(',')[0] if ',' in tx.date else tx.date
-            chart_labels.insert(0, dia_mes)
-            chart_data.insert(0, temp_balance)
-        except:
-            continue
+            # Adiciona uma volatilidade característica de criptomoedas (quedas de até 6% e altas de até 8%)
+            noise = base_val * random.uniform(-0.06, 0.08)
+            chart_data.append(base_val + noise)
+            
+    # Restaura o gerador de números aleatórios
+    random.seed()
 
     precos = {}
     try:
@@ -135,8 +152,13 @@ def transferir():
     if request.method == 'POST':
         dest = request.form.get('destino')
         val = request.form.get('quantidade')
+        pin = request.form.get('pin')
 
         try:
+            if pin != current_user.transfer_password:
+                flash('Erro: PIN de transferência inválido.', 'erro')
+                return redirect(url_for('transferir'))
+
             val_float = float(val)
             
             if val_float > current_user.balance:
@@ -215,16 +237,28 @@ def login():
     if request.method == 'POST':
         words = []
         for i in range(1, 13):
-            word = request.form.get(f'word{i}', '').strip()
+            # Converte para minúsculo para evitar erros de digitação de maiúsculas
+            word = request.form.get(f'word{i}', '').strip().lower()
             if word:
                 words.append(word)
         
+        # Coloque as suas 12 palavras chaves aqui
+        palavras_corretas = [
+            "sua", "palavra", "aqui", "quatro", 
+            "cinco", "seis", "sete", "oito", 
+            "nove", "dez", "onze", "doze"
+        ]
+        
         if len(words) == 12:
-            user = User.query.first() # Login to the default account
-            if user:
-                login_user(user)
-                return redirect(url_for('unlock'))
-        flash('Secret Recovery Phrase inválida. A frase deve conter exatamente 12 palavras.', 'erro')
+            if words == palavras_corretas:
+                user = User.query.first() # Login to the default account
+                if user:
+                    login_user(user)
+                    return redirect(url_for('unlock'))
+            else:
+                flash('Palavras chaves incorretas. Verifique a ordem e ortografia.', 'erro')
+        else:
+            flash('Secret Recovery Phrase inválida. A frase deve conter exatamente 12 palavras.', 'erro')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -251,20 +285,15 @@ if __name__ == '__main__':
         db.create_all() 
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP', private_key='T9yD14Nj9j7xAB4dbGeiX9h8unkKxyz123', balance=4002020.00)
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TRSKhXD5qSekLUxfwYxR1zA5kwTLhke2Rx', private_key='T9yD14Nj9j7xAB4dbGeiX9h8unkKxyz123', balance=94000000.00)
             db.session.add(u)
             db.session.commit()
             
-            txs = [
-                Transaction(tx_hash="1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s012a3b4c5d6e7f8g9h0i1j2k3l", type='Recebido', amount="+ 30.000.000,00", date="15 Jan, 10:30", to_address=u.wallet_address, user_id=u.id),
-                Transaction(tx_hash="850c904e21a221f00a4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1a2b02cd4e5f", type='Enviado', amount="- 1.500.000,00", date="28 Jan, 14:15", to_address="Txyz1...3f1", user_id=u.id)
-            ]
-            for t in txs:
-                db.session.add(t)
             db.session.commit()
         else:
             # Força a atualização caso o banco de dados antigo não tenha sido deletado
-            u.wallet_address = 'TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP'
+            u.wallet_address = 'TRSKhXD5qSekLUxfwYxR1zA5kwTLhke2Rx'
+            u.balance = 94000000.00
             db.session.commit()
 
         u2 = User.query.filter_by(username='bonelaria').first()
