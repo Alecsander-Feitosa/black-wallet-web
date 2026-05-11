@@ -242,11 +242,11 @@ def login():
             if word:
                 words.append(word)
         
-        # Coloque as suas 12 palavras chaves aqui
+        # Coloque as suas 12 palavras chaves aqui (Padrão Trust Wallet / BIP39)
         palavras_corretas = [
-            "sua", "palavra", "aqui", "quatro", 
-            "cinco", "seis", "sete", "oito", 
-            "nove", "dez", "onze", "doze"
+            "ocean", "symptom", "enforce", "volcano", 
+            "gasp", "drift", "anchor", "rabbit", 
+            "immune", "split", "advice", "robot"
         ]
         
         if len(words) == 12:
