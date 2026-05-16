@@ -507,7 +507,7 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: {{ chart_labels | tojson }
+                        labels: {{ chart_labels | tojson }}
         },
             datasets: [{
                 label: 'Saldo em USDT', data: {{ chart_data | tojson }},
