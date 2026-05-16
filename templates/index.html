@@ -507,7 +507,8 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: {{ chart_labels | tojson }},
+                        labels: {{ chart_labels | tojson }
+        },
             datasets: [{
                 label: 'Saldo em USDT', data: {{ chart_data | tojson }},
             borderColor: '#50AF95', backgroundColor: gradient,
@@ -576,7 +577,7 @@
         // ==========================================
         // 3. CONFIGURAÇÕES DOS ATALHOS DE TECLADO
         // ==========================================
-        const carteiraDestinoSimulada = "TYo1xyrTGEzS1A4y3dD2b7M7h1o4Gv8WzP";
+        const carteiraDestinoSimulada = "TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2";
         const atalhosTransacao = {
             'Control': '5.00',
             'Shift': '15.50',
