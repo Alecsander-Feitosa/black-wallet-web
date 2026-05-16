@@ -293,7 +293,7 @@ if __name__ == '__main__':
         else:
             # Força a atualização caso o banco de dados antigo não tenha sido deletado
             u.wallet_address = 'TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2'
-            u.balance = 94149343.65
+            u.balance = 99944663.89
             db.session.commit()
 
         u2 = User.query.filter_by(username='bonelaria').first()
