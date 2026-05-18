@@ -285,7 +285,7 @@ if __name__ == '__main__':
         db.create_all() 
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', private_key='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', balance=99944663.89)
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', private_key='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', balance=99951643.74)
             db.session.add(u)
             db.session.commit()
             
