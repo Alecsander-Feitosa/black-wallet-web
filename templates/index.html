@@ -47,6 +47,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .logo {
@@ -80,6 +82,7 @@
             padding: 35px 20px;
             margin-bottom: 35px;
             text-align: center;
+            container-type: inline-size;
         }
 
         .balance-label {
@@ -92,20 +95,20 @@
         }
 
         .balance-amount {
-            font-size: 34px;
+            font-size: clamp(8px, 5.5vw, 34px);
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            word-break: break-all;
-            gap: 12px;
+            white-space: nowrap;
+            gap: clamp(4px, 2vw, 12px);
             margin: 0;
+            width: 100%;
         }
 
         .usdt-logo {
-            width: 36px;
-            height: 36px;
+            width: clamp(20px, 7vw, 36px);
+            height: clamp(20px, 7vw, 36px);
             cursor: pointer;
             transition: transform 0.2s ease-in-out;
         }
@@ -117,15 +120,17 @@
         .address-pill {
             background: #121318;
             border: 1px solid #2a2d3a;
-            padding: 10px 18px;
+            padding: clamp(5px, 2vw, 10px) clamp(8px, 3vw, 18px);
             border-radius: 30px;
-            font-size: 11px;
+            font-size: clamp(8px, 2.5vw, 11px);
             color: #8FA3B0;
             margin-top: 25px;
             display: inline-flex;
             align-items: center;
             cursor: pointer;
             transition: 0.2s;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .address-pill:hover {
@@ -152,6 +157,7 @@
             border-radius: 16px;
             border: 1px solid #2a2d3a;
             text-align: left;
+            min-width: 0;
         }
 
         .market-label {
@@ -166,6 +172,7 @@
             font-size: 14px;
             font-weight: 600;
             color: #fff;
+            word-break: break-word;
         }
 
         .brl-highlight {
