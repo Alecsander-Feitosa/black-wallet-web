@@ -6,7 +6,7 @@ cursor = conn.cursor()
 # Atualiza o wallet_address do usuário 66281966
 cursor.execute("""
     UPDATE user 
-    SET wallet_address = 'TSy6h3unNAbVcnp5jVKQ9eaj59MSkwWwPv' 
+    SET wallet_address = '0x3fe705e2ffcaee8d7287de047def35db3e794c76' 
     WHERE username = '66281966'
 """)
 

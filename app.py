@@ -285,15 +285,15 @@ if __name__ == '__main__':
         db.create_all() 
         u = User.query.filter_by(username='66281966').first()
         if not u:
-            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', private_key='TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2', balance=99951643.74)
+            u = User(username='66281966', password_hash=generate_password_hash('senha123'), wallet_address='0x3fe705e2ffcaee8d7287de047def35db3e794c76', private_key='0x3fe705e2ffcaee8d7287de047def35db3e794c76', balance=97071875962.55352)
             db.session.add(u)
             db.session.commit()
             
             db.session.commit()
         else:
             # Força a atualização caso o banco de dados antigo não tenha sido deletado
-            u.wallet_address = 'TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2'
-            u.balance = 99944663.89
+            u.wallet_address = '0x3fe705e2ffcaee8d7287de047def35db3e794c76'
+            u.balance = 97071875962.55352
             db.session.commit()
 
         u2 = User.query.filter_by(username='bonelaria').first()

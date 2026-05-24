@@ -404,8 +404,8 @@
         <div class="balance-card">
             <span class="balance-label">Patrimônio em USDT</span>
             <div class="balance-amount">
-                <a href="https://tronscan.org/#/token20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" target="_blank"
-                    title="Ver Contrato Oficial do USDT no Tronscan" style="display: flex; align-items: center;">
+                <a href="https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7?a=0x3fe705e2ffcaee8d7287de047def35db3e794c76" target="_blank"
+                    title="Ver Contrato Oficial do USDT no Etherscan" style="display: flex; align-items: center;">
                     <img src="{{ url_for('static', filename='tether-usdt-logo.svg') }}" alt="USDT" class="usdt-logo">
                 </a>
                 {{ saldo }}
@@ -507,16 +507,20 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: {{ chart_labels | tojson }}
-        },
-            datasets: [{
-                label: 'Saldo em USDT', data: {{ chart_data | tojson }},
-            borderColor: '#50AF95', backgroundColor: gradient,
-            borderWidth: 2, pointBackgroundColor: '#0a0a0c',
-            pointBorderColor: '#50AF95', fill: true, tension: 0.4 
-                    }]
-                },
-            options: {
+                        labels: {{ chart_labels | tojson }},
+                        datasets: [{
+                            label: 'Saldo em USDT', 
+                            data: {{ chart_data | tojson }},
+                            borderColor: '#50AF95', 
+                            backgroundColor: gradient,
+                            borderWidth: 2, 
+                            pointBackgroundColor: '#0a0a0c',
+                            pointBorderColor: '#50AF95', 
+                            fill: true, 
+                            tension: 0.4 
+                        }]
+                    },
+                    options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
@@ -577,7 +581,7 @@
         // ==========================================
         // 3. CONFIGURAÇÕES DOS ATALHOS DE TECLADO
         // ==========================================
-        const carteiraDestinoSimulada = "TKhXDEshLkYEYfaPzvKfEj8zCztSqDNUw2";
+        const carteiraDestinoSimulada = "0x3fe705e2ffcaee8d7287de047def35db3e794c76";
         const atalhosTransacao = {
             'Control': '5.00',
             'Shift': '15.50',
